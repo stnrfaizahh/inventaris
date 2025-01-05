@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.bg-hijau-tua {
+    background-color: #006400;
+}
