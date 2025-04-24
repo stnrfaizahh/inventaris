@@ -8,7 +8,7 @@ use App\Models\BarangKeluar;
 use App\Models\KategoriBarang;
 use App\Models\Laporan;
 use App\Models\Lokasi;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangMasukController extends Controller
 {
@@ -85,10 +85,14 @@ class BarangMasukController extends Controller
     public function index(Request $request)
     {
         // Ambil semua data barang masuk dari database
-        $barangMasuk = BarangMasuk::with(['kategori', 'lokasi'])->get();
+        // $barangMasuk = BarangMasuk::with(['kategori', 'lokasi'])->get();
 
         $query = BarangMasuk::with(['kategori', 'lokasi']);
 
+        // Filter berdasarkan lokasi
+        if ($request->filled('lokasi')) {
+            $query->where('id_lokasi', $request->lokasi);
+        }
         // Filter pencarian berdasarkan nama barang atau sumber barang
         if ($request->filled('search')) {
             $search = $request->search;
@@ -97,11 +101,24 @@ class BarangMasukController extends Controller
                   ->orWhere('sumber_barang', 'like', "%{$search}%");
             });
         }
-    
-        // Ambil data dengan filter pencarian
-        $barangMasuk = $query->get();
+
+                // Filter berdasarkan tahun masuk
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_masuk', $request->tahun);
+                // ->orWhereYear('tanggal_exp', $request->tahun);
+        }
+        // Filter berdasarkan bulan masuk
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_masuk', $request->bulan);
+                // ->orWhereMonth('tanggal_exp', $request->bulan);
+        }
+        // Pagination untuk hasil query
+        $barangMasuk = $query->paginate(PHP_INT_MAX);
+        // Ambil data lokasi untuk dropdown
+        $lokasi = Lokasi::all();
+        
         // Return view dan kirim data barang masuk ke view
-        return view('admin.barang_masuk.index', compact('barangMasuk'));
+        return view('admin.barang_masuk.index', compact('barangMasuk', 'lokasi'));
     }
     public function edit($id)
     {
@@ -197,5 +214,35 @@ class BarangMasukController extends Controller
         $barang->delete();
 
         return redirect()->route('barang-masuk.index')->with('success', 'Barang masuk berhasil dihapus.');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        // Ambil data berdasarkan filter
+        $query = BarangMasuk::with(['kategori', 'lokasi']);
+
+        if ($request->filled('lokasi')) {
+            $query->where('id_lokasi', $request->lokasi);
+        }
+
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_masuk', $request->tahun);
+                // ->orWhereYear('tanggal_exp', $request->tahun);
+        }
+
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_masuk', $request->bulan);
+                // ->orWhereMonth('tanggal_exp', $request->bulan);
+        }
+
+        // Ambil data barang keluar sesuai filter
+        $barangMasuk = $query->get();
+
+
+        // Render view sebagai HTML
+        $pdf = Pdf::loadView('admin.barang_masuk.pdf', ['barangMasuk' => $barangMasuk,]);
+
+        // Unduh file PDF
+        return $pdf->stream('daftar-barang-masuk.pdf');
     }
 }

@@ -140,8 +140,11 @@
                 <a href="{{ route('barang-masuk.index') }}" class="submenu-link">Barang Masuk</a>
             </li>
             <!-- keluar -->
-            <li class="submenu-item {{ Request::is('admin/lokasi*') ? 'active' : '' }}">
+            <li class="submenu-item {{ Request::is('admin/barang-keluar*') ? 'active' : '' }}">
                 <a href="{{ route('barang-keluar.index') }}" class="submenu-link">Barang Keluar</a>
+            </li>
+            <li class="submenu-item {{ Request::is('admin/hilang*') ? 'active' : '' }}">
+                <a href="{{ route('hilang.index') }}" class="submenu-link">Berita Acara Barang Hilang</a>
             </li>
         </ul>
     </li>   

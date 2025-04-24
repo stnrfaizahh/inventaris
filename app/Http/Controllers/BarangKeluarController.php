@@ -80,7 +80,7 @@ class BarangKeluarController extends Controller
     }
     public function index(Request $request)
     {
-        $barangKeluar = BarangKeluar::with(['kategori', 'lokasi'])->get();
+        // $barangKeluar = BarangKeluar::with(['kategori', 'lokasi'])->get();
 
         $query = BarangKeluar::with(['kategori', 'lokasi']);
 
@@ -93,20 +93,22 @@ class BarangKeluarController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama_barang', 'like', "%{$search}%")
-                    ->orWhere('id_kategori_barang', 'like', "%{$search}%");
+                    ->orWhereHas('kategori', function ($q) use ($search) {
+                        $q->where('nama_kategori_barang', 'like', "%{$search}%");
+                    });
             });
         }
-        $barangKeluar = $query->get();
+        // $barangKeluar = $query->get();
 
         // Filter berdasarkan tahun keluar/expired
         if ($request->filled('tahun')) {
-            $query->whereYear('tanggal_keluar', $request->tahun)
-                ->orWhereYear('tanggal_exp', $request->tahun);
+            $query->whereYear('tanggal_keluar', $request->tahun);
+                // ->orWhereYear('tanggal_exp', $request->tahun);
         }
         // Filter berdasarkan bulan keluar/expired
         if ($request->filled('bulan')) {
-            $query->whereMonth('tanggal_keluar', $request->bulan)
-                ->orWhereMonth('tanggal_exp', $request->bulan);
+            $query->whereMonth('tanggal_keluar', $request->bulan);
+                // ->orWhereMonth('tanggal_exp', $request->bulan);
         }
 
         // Pagination untuk hasil query
@@ -207,13 +209,13 @@ class BarangKeluarController extends Controller
         }
 
         if ($request->filled('tahun')) {
-            $query->whereYear('tanggal_keluar', $request->tahun)
-                ->orWhereYear('tanggal_exp', $request->tahun);
+            $query->whereYear('tanggal_keluar', $request->tahun);
+                // ->orWhereYear('tanggal_exp', $request->tahun);
         }
 
         if ($request->filled('bulan')) {
-            $query->whereMonth('tanggal_keluar', $request->bulan)
-                ->orWhereMonth('tanggal_exp', $request->bulan);
+            $query->whereMonth('tanggal_keluar', $request->bulan);
+                // ->orWhereMonth('tanggal_exp', $request->bulan);
         }
 
         // Ambil data barang keluar sesuai filter

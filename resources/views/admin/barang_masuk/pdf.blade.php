@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Barang Keluar</title>
+    <title>Daftar Barang Masuk</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,15 +58,30 @@
     <div class="container">
         <div class="kop-surat">
             <h2>DAFTAR INVENTARIS BARANG </h2>
-            <h3>Laporan Barang Keluar</h3>
+            <h3>Laporan Barang Masuk</h3>
             <h4>SD ISLAM TOMPOKERSAN LUMAJANG</h4>
-            <h4>TAHUN PELAJARAN {{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar)) : 'Tidak Diketahui' }}/{{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar . ' +1 year')) : '' }}</h4> 
+            <h4>TAHUN PELAJARAN {{ $barangMasuk->isNotEmpty() ? date('Y', strtotime($barangMasuk->first()->tanggal_masuk)) : 'Tidak Diketahui' }}/{{ $barangMasuk->isNotEmpty() ? date('Y', strtotime($barangMasuk->first()->tanggal_masuk . ' +1 year')) : '' }}</h4> 
         </div>
         <h4 style="text-align: left">
-            @if(request('lokasi')) Lokasi: {{ $barangKeluar->first()->lokasi->nama_lokasi ?? 'Semua Lokasi' }}  @endif
-        {{-- @if(request('tahun')) Tahun: {{ request('tahun') }} | @endif
-        @if(request('bulan')) Bulan: {{ DateTime::createFromFormat('!m', request('bulan'))->format('F') }} @endif --}}
+            @if(request('lokasi'))
+                Lokasi: {{ $barangMasuk->first()->lokasi->nama_lokasi ?? 'Semua Lokasi' }} <br>
+            @endif
+        
+            @if(request('bulan') || request('tahun'))
+            <p>
+                Periode:
+                @if(request('bulan'))
+                    {{ \Carbon\Carbon::create()->month((int) request('bulan'))->translatedFormat('F') }}
+                @endif
+                @if(request('bulan') && request('tahun')) /
+                @endif
+                @if(request('tahun'))
+                    {{ request('tahun') }}
+                @endif
+            </p>    
+            @endif
         </h4>
+        
         <hr>
         <table>
             <thead>
@@ -74,30 +89,32 @@
                     <th>No</th>
                     <th>Kategori Barang</th>
                     <th>Nama Barang</th>
-                    <th>Jumlah Keluar</th>
+                    <th>Jumlah Masuk</th>
                     <th>Kondisi</th>
-                    <th>Tanggal Keluar</th>
-                    <th>Tanggal Expired</th>
+                    <th>Tanggal Masuk</th>
                     <th>Keterangan</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($barangKeluar as $item)
+                @foreach ($barangMasuk as $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->kategori->nama_kategori_barang }}</td>
                         <td>{{ $item->nama_barang }}</td>
-                        <td>{{ $item->jumlah_keluar }}</td>
+                        <td>{{ $item->jumlah_masuk }}</td>
                         <td>{{ ucfirst($item->kondisi) }}</td>
-                        <td>{{ $item->tanggal_keluar }}</td>
-                        <td>{{ $item->tanggal_exp }}</td>
+                        <td>{{ $item->tanggal_masuk }}</td>
                         <td></td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+        <p style="margin-top: 10px; font-weight: bold;">
+            Total Barang Masuk: {{ $barangMasuk->sum('jumlah_masuk') }}
+        </p>
+        
 
-        <!-- Bagian Tanda Tangan -->
+        <!-- Bagian bulan Tanda Tangan -->
         <div class="ttd">
             <div class="left-ttd">
                 <p>Mengetahui,</p>
@@ -107,14 +124,14 @@
                 <p>Yuni Rochmulyati, S.Pd </p>
             </div>
             <div class="right-ttd">
-                @if($barangKeluar->isNotEmpty())
+                @if($barangMasuk->isNotEmpty())
                     <p>Lumajang, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    <p>Penanggung Jawab Lokasi:</p>
+                    <p>Penanggung Jawab</p>
                     <br><br>
                     <p>___________________________</p>
-                    <p>{{ $barangKeluar->first()->nama_penanggungjawab }}</p>
+                    <p>{{ $barangMasuk->first()->nama_penanggungjawab }}</p>
                 @else
-                    <p>Penanggung Jawab Lokasi:</p>
+                    <p>Penanggung Jawab:</p>
                     <br><br>
                     <p>___________________________</p>
                     <p>...........................</p>

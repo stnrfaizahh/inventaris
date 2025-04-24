@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\KategoriBarang;
-use GuzzleHttp\Promise\Create;
+// use GuzzleHttp\Promise\Create;
 
 class KategoriController extends Controller
 {

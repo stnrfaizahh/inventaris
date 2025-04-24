@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Barang Keluar</title>
+    <title>Daftar Barang Hilang</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,7 +58,7 @@
     <div class="container">
         <div class="kop-surat">
             <h2>DAFTAR INVENTARIS BARANG </h2>
-            <h3>Laporan Barang Keluar</h3>
+            <h3>Laporan Barang Hilang</h3>
             <h4>SD ISLAM TOMPOKERSAN LUMAJANG</h4>
             <h4>TAHUN PELAJARAN {{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar)) : 'Tidak Diketahui' }}/{{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar . ' +1 year')) : '' }}</h4> 
         </div>
@@ -74,8 +74,8 @@
                     <th>No</th>
                     <th>Kategori Barang</th>
                     <th>Nama Barang</th>
-                    <th>Jumlah Keluar</th>
-                    <th>Kondisi</th>
+                    <th>Jumlah</th>
+                    
                     <th>Tanggal Keluar</th>
                     <th>Tanggal Expired</th>
                     <th>Keterangan</th>
@@ -88,7 +88,7 @@
                         <td>{{ $item->kategori->nama_kategori_barang }}</td>
                         <td>{{ $item->nama_barang }}</td>
                         <td>{{ $item->jumlah_keluar }}</td>
-                        <td>{{ ucfirst($item->kondisi) }}</td>
+                        
                         <td>{{ $item->tanggal_keluar }}</td>
                         <td>{{ $item->tanggal_exp }}</td>
                         <td></td>
@@ -109,12 +109,12 @@
             <div class="right-ttd">
                 @if($barangKeluar->isNotEmpty())
                     <p>Lumajang, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    <p>Penanggung Jawab Lokasi:</p>
+                    <p>Penanggung Jawab</p>
                     <br><br>
                     <p>___________________________</p>
                     <p>{{ $barangKeluar->first()->nama_penanggungjawab }}</p>
                 @else
-                    <p>Penanggung Jawab Lokasi:</p>
+                    <p>Penanggung Jawab</p>
                     <br><br>
                     <p>___________________________</p>
                     <p>...........................</p>

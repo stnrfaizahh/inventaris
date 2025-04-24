@@ -14,23 +14,63 @@
             {{ session('success') }}
         </div>
     @endif
-    {{-- Pesan error setelah melakukan tindakan --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-    
-    <div class="row mb-3">
-                
-                <div class="col-12 text-end">
-                <a href="{{ route('barang-masuk.create') }}" class="btn btn-primary">Tambah</a> <!-- Button Add with Link -->
+
+     <!-- Filter Lokasi -->
+     <div class="row mb-3 align-items-center">
+        <!-- Form Filter -->
+        <div class="col-md-8">
+            <form action="{{ route('barang-masuk.index') }}" method="GET" id="filterForm" class="row g-2 mb-3">
+                <!-- Filter Lokasi -->
+                <div class="col-md-3">
+                    <select id="filter-lokasi" name="lokasi" class="form-select">
+                        <option value="" selected>Pilih Lokasi</option>
+                        @foreach ($lokasi as $loc)
+                            <option value="{{ $loc->id_lokasi }}" {{ request('lokasi') == $loc->id_lokasi ? 'selected' : '' }}>
+                                {{ $loc->nama_lokasi }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
-            </div>
+            
+                <!-- Filter Tahun -->
+                <div class="col-md-3">
+                    <select id="filter-tahun" name="tahun" class="form-select">
+                        <option value="" selected>Pilih Tahun</option>
+                        @foreach (range(date('Y') - 10, date('Y')) as $tahun)
+                            <option value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                                {{ $tahun }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Filter Bulan -->
+                <div class="col-md-3">
+                    <select id="filter-bulan" name="bulan" class="form-select">
+                        <option value="" selected>Pilih Bulan</option>
+                        @foreach (range(1, 12) as $bulan)
+                            <option value="{{ $bulan }}" {{ request('bulan') == $bulan ? 'selected' : '' }}>
+                                {{ DateTime::createFromFormat('!m', $bulan)->format('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            
+                <!-- Tombol Filter -->
+                <div class="col-md-3 text-end">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ route('barang-masuk.index') }}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+            
+        </div>
+         <!-- Tombol Cetak dan Tambah -->
+         <div class="col-md-4 text-end">
+            <a href="{{ route('barang-masuk.export-pdf', request()->all()) }}" class="btn btn-danger">Export PDF</a>
+
+            <a href="{{ route('barang-masuk.create') }}" class="btn btn-primary">Tambah</a>
+        </div>
+    </div>
             <div class="table-responsive" style="overflow-x: auto; white-space: nowrap;">
                 <table class="table" id="table1">
                     <thead>
