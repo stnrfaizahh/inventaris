@@ -118,6 +118,10 @@
             <span>Data Master</span>
         </a>
         <ul class="submenu">
+             <!-- barang -->
+            <li class="submenu-item {{ Request::is('admin/barang*') ? 'active' : '' }}">
+                <a href="{{ route('barang.index') }}" class="submenu-link">Barang</a>
+            </li>
              <!-- kategori -->
             <li class="submenu-item {{ Request::is('admin/kategori*') ? 'active' : '' }}">
                 <a href="{{ route('kategori.index') }}" class="submenu-link">Kategori</a>

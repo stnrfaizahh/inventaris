@@ -66,7 +66,7 @@
                 <!-- Tombol Cetak dan Tambah -->
                 <div class="col-md-4 text-end">
                     <a href="{{ route('barang-keluar.export-pdf', request()->all()) }}" class="btn btn-danger">Export PDF</a>
-
+                    <a href="{{ route('barang-keluar.print-all-qr', request()->query() )}}" class="btn btn-outline-success" target="_blank">Cetak Semua QR</a>
                     <a href="{{ route('barang-keluar.create') }}" class="btn btn-primary">Tambah</a>
                 </div>
             </div>
@@ -84,6 +84,7 @@
                             <th>Tanggal Keluar</th>
                             <th>EXP</th>
                             <th>Penanggung Jawab</th>
+                            <th>QRCode</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -99,13 +100,27 @@
                         <td>{{ $item->tanggal_keluar }}</td>
                         <td>{{ $item->tanggal_exp }}</td>
                         <td>{{ $item->nama_penanggungjawab }}</td>
-                            <td  >
+                        <td>
+                        {!! QrCode::size(80)->generate(
+                            "Kategori: {$item->kategori->nama_kategori_barang}\n" .
+                            "Nama: {$item->nama_barang}\n" .
+                            "Lokasi: {$item->lokasi->nama_lokasi}\n" .
+                            "Tanggal Keluar: " . \Carbon\Carbon::parse($item->tanggal_keluar)->format('d-m-Y') . "\n" .
+                            "Tanggal Exp: " . \Carbon\Carbon::parse($item->tanggal_exp)->format('d-m-Y')
+                        ) !!}
+
+                        </td>
+                        <td >
                             <a href="{{ route('barang-keluar.edit', $item->id_barang_keluar) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i></a>
                             <form action="{{ route('barang-keluar.destroy', $item->id_barang_keluar) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus barang ini?');">
                                             @csrf
                                             @method('DELETE')
-                                <button class="btn btn-danger btn-sm"><i class="bi bi-trash3-fill"></i></button></form>
-                            </td>
+                                <button class="btn btn-danger btn-sm"><i class="bi bi-trash3-fill"></i></button>
+                            </form>
+                             <a href="{{ route('barang-keluar.print-qr', $item->id_barang_keluar) }}" class="btn btn-success btn-sm mt-1" target="_blank">
+                                <i class="bi bi-printer-fill"></i> QR
+                            </a>
+                        </td>
                         </tr>
                         @empty
                         <tr>
@@ -120,7 +135,7 @@
     </div>
         
         
-    </div>
+    </div> 
 </div>
     
 </section>

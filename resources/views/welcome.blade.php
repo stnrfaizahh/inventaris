@@ -59,7 +59,8 @@
         <div class="row gy-4">
           <div class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center" data-aos="zoom-out">
             <h1>Sistem Manajemen Inventaris Barang</h1>
-            <p>Selamat datang di Portal Sistem Manajemen Inventaris SD Islam Tompokesan! <br> Pantau, catat, dan kelola aset & inventaris sekolah dengan sistem yang dirancang khusus untuk mendukung kebutuhan sekolah secara akurat dan efisien.</p>
+            <p>Selamat datang di Portal Sistem Manajemen Inventaris SD Islam Tompokesan! 
+              <br> Pantau, catat, dan kelola aset & inventaris sekolah dengan sistem yang dirancang khusus untuk mendukung kebutuhan sekolah secara akurat dan efisien.</p>
             <div class="d-flex">
                @guest
               <a href="{{ route('login') }}" class="btn-get-started ">Login</a>
@@ -148,7 +149,7 @@
       <p>© <span>Copyright</span> <strong class="px-1 sitename">E-Invensi</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
         
-        Designed by <a href="https://bootstrapmade.com/">TeamWEB SD Islam Tompokersan</a>
+        Designed by <a href="https://bootstrapmade.com/">Team WEB SD Islam Tompokersan</a>
       </div>
     </div>
 

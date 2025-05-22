@@ -65,6 +65,7 @@
                 </div>
                 <!-- Tombol Cetak dan Tambah -->
                 <div class="col-md-4 text-end">
+                    <a href="{{ route('hilang.create') }}" class="btn btn-success me-2">Tambah Barang Hilang</a>
                     <a href="{{ route('hilang.export-pdf', request()->all()) }}" class="btn btn-danger">Export PDF</a>
                 </div>
             </div>
@@ -76,12 +77,12 @@
                             <th>No</th>
                             <th>Kategori</th>
                             <th>Barang</th>
-                            <th>Jumlah</th>
-                            
+                            <th>Jumlah Hilang</th>
                             <th>Lokasi</th>
                             <th>Tanggal Keluar</th>
-                            <th>EXP</th>
+                            <th>Tanggal Hilang</th>
                             <th>Penanggung Jawab</th>
+                            <th>Keterangan</th>
                             
                         </tr>
                     </thead>
@@ -94,9 +95,9 @@
                         <td>{{ $item->jumlah_keluar }}</td>
                         <td>{{ $item->lokasi->nama_lokasi }}</td>
                         <td>{{ $item->tanggal_keluar }}</td>
-                        <td>{{ $item->tanggal_exp }}</td>
+                        <td>{{ $item->hilang->tanggal_hilang ?? '-' }}</td>
                         <td>{{ $item->nama_penanggungjawab }}</td>
-                            
+                        <td>{{ $item->hilang->keterangan ?? '-' }}</td>    
                         </tr>
                         @empty
                         <tr>

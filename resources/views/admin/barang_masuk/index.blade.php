@@ -8,10 +8,20 @@
  <section class="section">
     <div class="card">
         <div class="card-body">
-            {{-- Pesan sukses setelah melakukan tindakan --}}
-        @if (session('success'))
+    {{-- Pesan sukses setelah melakukan tindakan --}}
+    @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
+        </div>
+    @endif
+    {{-- Tampilkan error --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -19,7 +29,7 @@
      <div class="row mb-3 align-items-center">
         <!-- Form Filter -->
         <div class="col-md-8">
-            <form action="{{ route('barang-masuk.index') }}" method="GET" id="filterForm" class="row g-2 mb-3">
+            <form action="{{ route('barang-masuk.index') }}" method="GET" id="filterForm" class="row align-items-end g-2 mb-3">
                 <!-- Filter Lokasi -->
                 <div class="col-md-3">
                     <select id="filter-lokasi" name="lokasi" class="form-select">
@@ -127,8 +137,6 @@
                     </tbody>
                 </table>
             </div>
-            
-        <!-- Modal Edit Barang Masuk -->
 
     </div>      
     </div>

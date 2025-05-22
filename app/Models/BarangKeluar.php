@@ -30,4 +30,8 @@ class BarangKeluar extends Model
     {
         return $this->belongsTo(Lokasi::class,  'id_lokasi', 'id_lokasi');
     }
+    public function hilang()
+    {
+    return $this->hasOne(Hilang::class, 'id_barang_keluar', 'id_barang_keluar');
+    }
 }

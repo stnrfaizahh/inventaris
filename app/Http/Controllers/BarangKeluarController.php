@@ -8,6 +8,10 @@ use App\Models\BarangMasuk;
 use App\Models\KategoriBarang;
 use App\Models\Lokasi;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
+
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangKeluarController extends Controller
@@ -61,6 +65,22 @@ class BarangKeluarController extends Controller
 
         $tanggalExp = Carbon::parse($request->tanggal_keluar)->addMonths((int)$request->masa_pakai);
 
+        // Ambil data barang masuk berdasarkan kategori dan nama
+        $barangMasuk = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
+            ->where('nama_barang', $request->nama_barang)
+            ->first();
+
+        if (!$barangMasuk) {
+            return redirect()->back()->with('error', 'Barang tidak ditemukan untuk kategori yang dipilih.')->withInput();
+        }
+        $kodeBarangMasuk = $barangMasuk->kode_barang ?? 'UNKNOWN';
+
+        // Ambil ID lokasi
+        $idLokasi = $request->lokasi;
+
+        // Gabungkan jadi kode barang keluar
+        $kodeBarangKeluar = $kodeBarangMasuk . '-' . $idLokasi;
+
         // Simpan data barang keluar
         BarangKeluar::create([
             'id_kategori_barang' => $request->kategori_barang,
@@ -72,11 +92,10 @@ class BarangKeluarController extends Controller
             'masa_pakai' => $request->masa_pakai,
             'tanggal_exp' => $tanggalExp,
             'nama_penanggungjawab' => $request->nama_penanggungjawab,
+            'kode_barang_keluar' => $kodeBarangKeluar,
         ]);
 
-
-
-        return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil ditambahkan');
+    return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil ditambahkan');
     }
     public function index(Request $request)
     {
@@ -103,12 +122,12 @@ class BarangKeluarController extends Controller
         // Filter berdasarkan tahun keluar/expired
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_keluar', $request->tahun);
-                // ->orWhereYear('tanggal_exp', $request->tahun);
+            // ->orWhereYear('tanggal_exp', $request->tahun);
         }
         // Filter berdasarkan bulan keluar/expired
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_keluar', $request->bulan);
-                // ->orWhereMonth('tanggal_exp', $request->bulan);
+            // ->orWhereMonth('tanggal_exp', $request->bulan);
         }
 
         // Pagination untuk hasil query
@@ -148,7 +167,7 @@ class BarangKeluarController extends Controller
             ->first();
 
         if (!$barangMasuk) {
-            return redirect()->back()->withErrors('Kategori atau nama barang tidak ditemukan pada data barang masuk.');
+            return redirect()->back()->withErrors('Barang tidak ditemukan pada data barang masuk.')->withInput();
         }
 
         // Hitung stok saat ini berdasarkan data barang masuk dan barang keluar
@@ -210,12 +229,12 @@ class BarangKeluarController extends Controller
 
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_keluar', $request->tahun);
-                // ->orWhereYear('tanggal_exp', $request->tahun);
+            // ->orWhereYear('tanggal_exp', $request->tahun);
         }
 
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_keluar', $request->bulan);
-                // ->orWhereMonth('tanggal_exp', $request->bulan);
+            // ->orWhereMonth('tanggal_exp', $request->bulan);
         }
 
         // Ambil data barang keluar sesuai filter
@@ -228,4 +247,46 @@ class BarangKeluarController extends Controller
         // Unduh file PDF
         return $pdf->stream('daftar-barang-keluar.pdf');
     }
+    public function printQr($id)
+    {
+        $barangKeluar = BarangKeluar::with(['kategori', 'lokasi'])->findOrFail($id);
+
+        // Buat isi QR code dengan info penting
+        $qrData = [
+            'Kode' => $barangKeluar->kode_barang_keluar,
+            'Nama Barang' => $barangKeluar->nama_barang,
+            'Lokasi' => $barangKeluar->lokasi->nama_lokasi,
+            'Tanggal Keluar' => Carbon::parse($barangKeluar->tanggal_keluar)->format('Y-m-d'),
+            'Tanggal Expired' =>  Carbon::parse($barangKeluar->tanggal_exp)->format('Y-m-d'),
+        ];
+
+        $qrContent = json_encode($qrData); // atau format teks biasa
+        $items = collect([$barangKeluar]);
+        return view('admin.barang_keluar.qrcode', compact('items'));
+    }
+    public function printQrAll(Request $request)
+    {
+    $query = BarangKeluar::with(['kategori', 'lokasi']);
+
+    // Terapkan filter lokasi jika ada
+    if ($request->filled('lokasi')) {
+        $query->where('id_lokasi', $request->lokasi);
+    }
+
+    // Terapkan filter tahun
+    if ($request->filled('tahun')) {
+        $query->whereYear('tanggal_keluar', $request->tahun);
+    }
+
+    // Terapkan filter bulan
+    if ($request->filled('bulan')) {
+        $query->whereMonth('tanggal_keluar', $request->bulan);
+    }
+
+    $items = $query->get();
+
+    return view('admin.barang_keluar.qrcode', compact('items'));
+    }
+
+
 }

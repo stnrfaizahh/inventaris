@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Label Barang Keluar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 1px;
+            margin: 0;
+            padding: 0;
+        }
+        .label {
+            border: 1px solid #000;
+            width: 350px;
+            height: 110px;
+            display: table;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin: 10px auto;
+            box-sizing: border-box;
+        }
+        .row-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .cell {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding: 5px;
+            border-right: 1px solid #000;
+        }
+        .cell:last-child {
+            border-right: none;
+        }
+        .logo img {
+            max-width: 70px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 8px;
+            margin-top: 3px;
+        }
+        .info h2 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .info h4 {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .qr img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .download-btn {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="margin: 20px; text-align: center;">
+        <button onclick="downloadLabels()" class="download-btn">Unduh QR Code Sebagai Gambar</button>
+    </div>
+
+    <div id="label-wrapper">
+        @foreach ($items as $index => $item)
+            @if ($index % 2 == 0)
+            <div class="row-label">
+            @endif
+
+            <div class="label">
+                <div class="cell logo">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                    <div class="logo-text">SD Islam Tompokersan</div>
+                    <div class="logo-text">Lumajang</div>
+                </div>
+
+                <div class="cell info">
+                    <h2>{{ $item->kode_barang_keluar }}</h2>
+                    <hr style="border: none; border-top: 1px solid #000;">
+                    <h4>{{ $item->nama_barang }}</h4>
+                </div>
+
+                <div class="cell qr">
+                    @php
+                        $qrData =
+                            "Kategori: {$item->kategori->nama_kategori_barang}\n" .
+                            "Nama: {$item->nama_barang}\n" .
+                            "Lokasi: {$item->lokasi->nama_lokasi}\n" .
+                            "Tanggal Keluar: " . \Carbon\Carbon::parse($item->tanggal_keluar)->format('d-m-Y') . "\n" .
+                            "Tanggal Exp: " . \Carbon\Carbon::parse($item->tanggal_exp)->format('d-m-Y');
+                        $qr = base64_encode(QrCode::format('png')->size(150)->margin(1)->generate($qrData));
+                    @endphp
+                    <img src="data:image/png;base64,{{ $qr }}" alt="QR Code">
+                </div>
+            </div>
+
+            @if ($index % 2 == 1 || $loop->last)
+            </div>
+            @endif
+        @endforeach
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+    function downloadLabels() {
+        const labels = document.querySelectorAll('.label');
+        labels.forEach((label, index) => {
+            html2canvas(label, {
+                scale: 4, // untuk menjaga kualitas tinggi
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `label-barang-${index + 1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+    }
+</script>
+
+</body>
+
+</html>

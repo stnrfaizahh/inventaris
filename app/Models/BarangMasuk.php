@@ -21,6 +21,11 @@ class BarangMasuk extends Model
         'id_lokasi',
         'tanggal_masuk'
     ];
+    public function barang()
+    {
+    return $this->belongsTo(Barang::class, 'id_barang', 'id_barang');
+    }
+
     public function kategori()
     {
         return $this->belongsTo(KategoriBarang::class, 'id_kategori_barang', 'id_kategori_barang');

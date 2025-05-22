@@ -34,7 +34,7 @@
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="kategori_barang">Kategori Barang</label>
-                                        <select name="kategori_barang" id="kategori_barang" class="form-select" required>
+                                        <select name="kategori_barang" id="kategori_barang" class="form-select" disabled>
                                             <option value="">-- Pilih Kategori --</option>
                                             @foreach($kategori_barang as $kategori)
                                                 <option value="{{ $kategori->id_kategori_barang }}" 
@@ -50,7 +50,7 @@
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="nama_barang">Nama Barang</label>
-                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required>
+                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -68,7 +68,7 @@
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="jumlah_masuk">Jumlah Masuk</label>
-                                        <input type="number" name="jumlah_masuk" id="jumlah_masuk" class="form-control" value="{{ $barang->jumlah_masuk }}" required>
+                                        <input type="number" name="jumlah_masuk" id="jumlah_masuk" class="form-control" value="{{ $barang->jumlah_masuk }}" required min="1">
                                     </div>
                                 </div>
                             </div>
