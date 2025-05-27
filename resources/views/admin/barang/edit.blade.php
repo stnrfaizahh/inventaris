@@ -10,14 +10,18 @@
 
         <div class="form-group">
             <label>Kategori Barang</label>
-            <select name="id_kategori_barang" class="form-control" required>
-                @foreach($kategori as $item)
-                    <option value="{{ $item->id_kategori_barang }}"
-                        {{ $item->id_kategori_barang == $barang->id_kategori_barang ? 'selected' : '' }}>
-                        {{ $item->nama_kategori_barang }}
-                    </option>
-                @endforeach
-            </select>
+           <select name="id_kategori_barang" class="form-control" required {{ $adaTransaksi ? 'disabled' : '' }}>
+    @foreach($kategori as $item)
+        <option value="{{ $item->id_kategori_barang }}"
+            {{ $item->id_kategori_barang == $barang->id_kategori_barang ? 'selected' : '' }}>
+            {{ $item->nama_kategori_barang }}
+        </option>
+    @endforeach
+</select>
+
+@if($adaTransaksi)
+    <small class="text-danger">Kategori tidak dapat diubah karena sudah ada transaksi.</small>
+@endif
         </div>
 
         <div class="form-group">

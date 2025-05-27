@@ -19,7 +19,7 @@
             border-collapse: collapse;
             margin: 1%;
             box-sizing: border-box;
-            /* float: left; */
+            /* float: left;  */
         }
         .row-label {
         display: flex;

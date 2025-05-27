@@ -38,7 +38,7 @@ class BarangController extends Controller
         $nomorUrut = str_pad($jumlahBarang + 1, 3, '0', STR_PAD_LEFT);
         $kodeBarang = $kodeKategori . $nomorUrut;
 
-        // $kodeBarang = strtoupper(Str::random(6));
+       
         $barcode = 'BRG-' . strtoupper(Str::random(8));
 
         Barang::create([
@@ -55,33 +55,39 @@ class BarangController extends Controller
     public function edit($id)
     {
         $barang = Barang::findOrFail($id);
-        if (
-            $barang->barangMasuk()->exists() ||
-            $barang->barangKeluar()->exists()
-            // || $barang->barangHilang()->exists()
-        ) {
-            return redirect()->route('barang.index')->with('error', 'Barang ini tidak dapat diedit karena sudah digunakan dalam transaksi.');
-        }
-    
         $kategori = KategoriBarang::all();
-        return view('admin.barang.edit', compact('barang', 'kategori'));
+
+        $adaTransaksi = $barang->barangMasuk()->exists() || $barang->barangKeluar()->exists();
+
+        return view('admin.barang.edit', compact('barang', 'kategori', 'adaTransaksi'));
     }
+
 
     // Update barang
     public function update(Request $request, Barang $barang)
-    {
-        $request->validate([
-            'id_kategori_barang' => 'required|exists:kategori_barang,id_kategori_barang',
-            'nama_barang' => 'required|string|max:255',
-        ]);
+{
+    $adaTransaksi = $barang->barangMasuk()->exists() || $barang->barangKeluar()->exists();
 
-        $barang->update([
-            'id_kategori_barang' => $request->id_kategori_barang,
-            'nama_barang' => $request->nama_barang,
-        ]);
+    $rules = [
+        'nama_barang' => 'required|string|max:255',
+    ];
 
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui.');
+    if (!$adaTransaksi) {
+        $rules['id_kategori_barang'] = 'required|exists:kategori_barang,id_kategori_barang';
     }
+
+    $validated = $request->validate($rules);
+
+    if (!$adaTransaksi) {
+        $barang->id_kategori_barang = $validated['id_kategori_barang'];
+    }
+
+    $barang->nama_barang = $validated['nama_barang'];
+    $barang->save();
+
+    return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui.');
+}
+
 
     // Hapus barang
     public function destroy($id)

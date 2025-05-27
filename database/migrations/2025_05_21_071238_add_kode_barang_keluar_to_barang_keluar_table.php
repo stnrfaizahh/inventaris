@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('barang_keluar', function (Blueprint $table) {
-            $table->string('kode_barang_keluar')->nullable()->after('updated_at');
-        });
+        $table->unsignedBigInteger('id_barang')->nullable()->after('id_kategori_barang');
+        $table->string('kode_barang_keluar')->nullable()->after('nama_penanggungjawab');
+    });
     }
 
     /**

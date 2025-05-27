@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BarangKeluar;
 use App\Models\BarangMasuk;
+use App\Models\Barang;
 use App\Models\KategoriBarang;
 use App\Models\Lokasi;
 use Carbon\Carbon;
@@ -18,90 +19,91 @@ class BarangKeluarController extends Controller
 {
     public function create()
     {
-        $barangMasuk = BarangMasuk::select('id_kategori_barang', 'nama_barang')
-            ->distinct()
-            ->with('kategori') // Ambil data relasi kategori
-            ->get();
+        $barangMasuk = Barang::with('kategori')->get();
 
         $lokasi = Lokasi::all();
 
         return view('admin.barang_keluar.create', compact('barangMasuk', 'lokasi'));
     }
 
+    public function cariBarcode($kode)
+    {
+        $barang = Barang::where('kode_barang', $kode)->first();
+
+        if ($barang) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id_barang' => $barang->id,
+                    'nama_barang' => $barang->nama,
+                    'kategori' => $barang->kategori->nama,
+                    'stok' => $barang->stok
+                ]
+            ]);
+        }
+
+        return response()->json(['status' => 'error']);
+    }
+
+
     // Menyimpan data barang keluar
     public function store(Request $request)
-    {
-        $request->validate([
-            'kategori_barang' => 'required|exists:kategori_barang,id_kategori_barang',
-            'nama_barang' => 'required|exists:barang_masuk,nama_barang',
-            'jumlah_keluar' => 'required|integer|min:1',
-            'kondisi' => 'required',
-            'lokasi' => 'required|exists:lokasi,id_lokasi',
-            'tanggal_keluar' => 'required|date',
-            'masa_pakai' => 'required|integer|min:1',
-            'nama_penanggungjawab' => 'required|string',
-        ]);
-        // cek barang apa tersedia di tabel barang masuk
-        $barangMasuk = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->get();
+{
+    $request->validate([
+        'id_barang' => 'required|exists:barang,id_barang',
+        'jumlah_keluar' => 'required|integer|min:1',
+        'kondisi' => 'required',
+        'lokasi' => 'required|exists:lokasi,id_lokasi',
+        'tanggal_keluar' => 'required|date',
+        'masa_pakai' => 'required|integer|min:1',
+        'nama_penanggungjawab' => 'required|string',
+    ]);
 
-        if ($barangMasuk->isEmpty()) {
-            return redirect()->back()->with('error', 'Barang yang dimaksud tidak ditemukan di stok masuk.')->withInput();
-        }
+    // Ambil data barang berdasarkan id_barang
+    $barang = Barang::with('kategori')->find($request->id_barang);
+    if (!$barang) {
+        return redirect()->back()->with('error', 'Barang tidak ditemukan.')->withInput();
+    }
 
+    // Hitung total stok
+    $totalStok = BarangMasuk::where('id_barang', $barang->id_barang)->sum('jumlah_masuk')
+        - BarangKeluar::where('id_barang', $barang->id_barang)->sum('jumlah_keluar');
 
-        $totalStok = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->sum('jumlah_masuk')
-            - BarangKeluar::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->sum('jumlah_keluar');
+    if ($totalStok < $request->jumlah_keluar) {
+        return redirect()->back()->with('error', 'Jumlah barang keluar melebihi stok yang tersedia.')->withInput();
+    }
 
-        // Cek apakah stok cukup
-        if ($totalStok < $request->jumlah_keluar) {
-            return redirect()->back()->with('error', 'Jumlah barang keluar melebihi stok yang tersedia.')->withInput();
-        }
+    $tanggalExp = Carbon::parse($request->tanggal_keluar)->addMonths((int)$request->masa_pakai);
 
-        $tanggalExp = Carbon::parse($request->tanggal_keluar)->addMonths((int)$request->masa_pakai);
+    // Ambil kode barang dari barang masuk (assumsi: data konsisten)
+    $barangMasuk = BarangMasuk::where('id_barang', $barang->id_barang)->first();
+    $kodeBarangMasuk = $barangMasuk->kode_barang ?? 'UNKNOWN';
 
-        // Ambil data barang masuk berdasarkan kategori dan nama
-        $barangMasuk = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->first();
+    $idLokasi = $request->lokasi;
+    $kodeBarangKeluar = $kodeBarangMasuk . '-' . $idLokasi;
 
-        if (!$barangMasuk) {
-            return redirect()->back()->with('error', 'Barang tidak ditemukan untuk kategori yang dipilih.')->withInput();
-        }
-        $kodeBarangMasuk = $barangMasuk->kode_barang ?? 'UNKNOWN';
-
-        // Ambil ID lokasi
-        $idLokasi = $request->lokasi;
-
-        // Gabungkan jadi kode barang keluar
-        $kodeBarangKeluar = $kodeBarangMasuk . '-' . $idLokasi;
-
-        // Simpan data barang keluar
-        BarangKeluar::create([
-            'id_kategori_barang' => $request->kategori_barang,
-            'nama_barang' => $request->nama_barang,
-            'jumlah_keluar' => $request->jumlah_keluar,
-            'kondisi' => $request->kondisi,
-            'id_lokasi' => $request->lokasi,
-            'tanggal_keluar' => $request->tanggal_keluar,
-            'masa_pakai' => $request->masa_pakai,
-            'tanggal_exp' => $tanggalExp,
-            'nama_penanggungjawab' => $request->nama_penanggungjawab,
-            'kode_barang_keluar' => $kodeBarangKeluar,
-        ]);
+    // Simpan data
+    BarangKeluar::create([
+        'id_barang' => $barang->id_barang,
+        'id_kategori_barang' => $barang->id_kategori_barang,
+        'nama_barang' => $barang->nama_barang,
+        'jumlah_keluar' => $request->jumlah_keluar,
+        'kondisi' => $request->kondisi,
+        'id_lokasi' => $idLokasi,
+        'tanggal_keluar' => $request->tanggal_keluar,
+        'masa_pakai' => $request->masa_pakai,
+        'tanggal_exp' => $tanggalExp,
+        'nama_penanggungjawab' => $request->nama_penanggungjawab,
+        'kode_barang_keluar' => $kodeBarangKeluar,
+    ]);
 
     return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil ditambahkan');
-    }
+}
+
     public function index(Request $request)
     {
-        // $barangKeluar = BarangKeluar::with(['kategori', 'lokasi'])->get();
 
-        $query = BarangKeluar::with(['kategori', 'lokasi']);
+        $query = BarangKeluar::with(['kategori', 'lokasi', 'barang']);
 
         // Filter berdasarkan lokasi
         if ($request->filled('lokasi')) {
@@ -117,8 +119,7 @@ class BarangKeluarController extends Controller
                     });
             });
         }
-        // $barangKeluar = $query->get();
-
+        
         // Filter berdasarkan tahun keluar/expired
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_keluar', $request->tahun);
@@ -287,6 +288,5 @@ class BarangKeluarController extends Controller
 
     return view('admin.barang_keluar.qrcode', compact('items'));
     }
-
 
 }

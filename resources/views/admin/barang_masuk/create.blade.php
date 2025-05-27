@@ -128,7 +128,7 @@
     let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5 });
     scanner.addListener('scan', function (content) {
         console.log('✅ Barcode berhasil terbaca:', content);
-        $('#barcode').val(content);
+        $('#barcode').val(content);  //simpan kode_barang hasil scan
 
        $.ajax({
         url: `/barang/cari-barcode/${content}`,
@@ -140,12 +140,21 @@
             const exists = $(`#id_barang option[value="${id}"]`).length > 0;
             console.log("ID ditemukan di dropdown:", exists);
 
-            if (res.status === 'success' && exists) {
-                $('#id_barang').val(id).change();
-                alert(`✅ Barang ditemukan: ${res.data.kode_barang} - ${res.data.nama_barang}`);
-            } else {
-                alert('⚠️ Barang ditemukan, tapi ID tidak cocok dengan dropdown.');
-            }
+            if (res.status === 'success') {
+    if (!exists) {
+        $('#id_barang').append(
+            `<option value="${res.data.id_barang}" selected>
+                ${res.data.kode_barang} - ${res.data.nama_barang}
+            </option>`
+        );
+    } else {
+        $('#id_barang').val(res.data.id_barang).change();
+    }
+    alert(`✅ Barang ditemukan: ${res.data.kode_barang} - ${res.data.nama_barang}`);
+} else {
+    alert('⚠️ Barang tidak ditemukan.');
+}
+
         },
         error: function () {
             alert('❌ Gagal mencari barang.');
@@ -165,6 +174,18 @@
         console.error(e);
         alert('Tidak bisa mengakses kamera.');
     });
-</script>
 
+     $('form').on('submit', function () {
+    if (!$('#id_barang').val()) {
+        alert('❌ Barang belum dipilih. Silakan scan atau pilih manual.');
+        return false;
+    }
+});
+</script>
+<script src="{{asset('dist/assets/static/js/components/dark.js')}}"></script>
+<script src="{{asset('dist/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js')}}"></script>
+<script src="{{asset('dist/assets/compiled/js/app.js')}}"></script>
+<script src="{{asset('dist/assets/extensions/jquery/jquery.min.js')}}"></script>
+<script src="{{asset('dist/assets/extensions/parsleyjs/parsley.min.js')}}"></script>
+<script src="{{asset('dist/assets/static/js/pages/parsley.js')}}"></script>
 @endsection

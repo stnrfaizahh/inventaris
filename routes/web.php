@@ -34,10 +34,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/barang-keluar/{id}/cetak-qrcode', [BarangKeluarController::class, 'printQr'])->name('barang-keluar.print-qr');
     Route::get('/barang-keluar/cetak-semua-qr', [BarangKeluarController::class, 'printQrAll'])->name('barang-keluar.print-all-qr');
 
+    Route::get('/dashboard/stok-barang/{id}', [DashboardController::class, 'ambilStokBarang']);
 
 
     Route::get('/barang/cari-barcode/{barcode}', [BarangMasukController::class, 'cariBarcode']);
+    Route::get('/barang/cari-barcode/{kode}', [BarangController::class, 'cariBarcode']);
 
+    
     Route::get('/barang-keluar/export-pdf', [BarangKeluarController::class, 'exportPdf'])->name('barang-keluar.export-pdf');
     Route::get('/hilang/export-pdf', [HilangController::class, 'exportPdf'])->name('hilang.export-pdf');
 

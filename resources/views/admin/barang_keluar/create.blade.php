@@ -1,219 +1,250 @@
 @extends('layouts.app')
 
-@section('title','E-Invensi-Barang Keluar')
+@section('title','E-Invensi - Barang Keluar')
 @section('header','Input Barang Keluar')
+
 @section('content')
-<!-- // Basic multiple Column Form section start -->
 <section id="multiple-column-form">
     <div class="row match-height">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-content">
-            <div class="card-body">
-              <form class="form" action="{{ route('barang-keluar.store') }}" method="POST">
-                @csrf
-                <!-- Alert Error -->
-                @if (session('error'))
-                <div class="alert alert-danger">
-                  <span class="icon">⚠️</span>
-                  {{ session('error') }}
-                </div>
-                @endif
-  
-                @if ($errors->any())
-                <div class="alert alert-danger">
-                  <span class="icon">⚠️</span>
-                  <ul>
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                  </ul>
-                </div>
-                @endif
-  
-                <!-- Baris Pertama -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="nama_penanggungjawab" class="form-label">Penanggung Jawab</label>
-                          <input type="text" id="nama_penanggungjawab" class="form-control" placeholder="Penanggung Jawab" name="nama_penanggungjawab" required />
-                        </div>
-                      </div>
-                      
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="kategori_barang" class="form-label">Kategori Barang</label>
-                      <select id="kategori_barang" name="kategori_barang" class="form-control" required>
-                        <option value="" disabled selected>-- Pilih Kategori --</option>
-                        @foreach($barangMasuk->unique('id_kategori_barang') as $barang)
-                        <option value="{{ $barang->id_kategori_barang }}">{{ $barang->kategori->nama_kategori_barang }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                  </div>
-                </div>
-  
-                <!-- Baris Kedua -->
-                <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="nama_barang" class="form-label">Barang</label>
-                        <select id="nama_barang" name="nama_barang" class="form-control" disabled>
-                          <option value="" disabled selected>Pilih Barang</option>
-                          @foreach($barangMasuk as $barang)
-                            <option value="{{ $barang->nama_barang }}" data-kategori="{{ $barang->id_kategori_barang }}">
-                              {{ $barang->nama_barang }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    </div>
-                  
-                    <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                          <input type="number" id="jumlah_keluar" name="jumlah_keluar" class="form-control" required />
-                        </div>
-                      </div>
-                      
-                  
-                </div>
-  
-                <!-- Baris Ketiga -->
-                <div class="row">
-                  
-                    <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="kondisi" class="form-label">Kondisi Barang</label>
-                          <select id="kondisi" name="kondisi" class="form-control" required>
-                            <option value="" disabled selected>-- Pilih Kondisi --</option>
-                            <option value="baru">Baru</option>
-                            <option value="rusak">Rusak</option>
-                            <option value="hilang">Hilang</option>
-                          </select>
-                        </div>
-                      </div>
-                      
+        <div class="col-12">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        <form class="form" action="{{ route('barang-keluar.store') }}" method="POST">
+                            @csrf
 
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="lokasi" class="form-label">Lokasi</label>
-                          <select id="lokasi" name="lokasi" class="form-control" required>
-                            <option value="" disabled selected>Pilih Lokasi</option>
-                            @foreach ($lokasi as $loc)
-                              <option value="{{ $loc->id_lokasi }}">{{ $loc->nama_lokasi }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-                      
-                </div>
-  
-                <!-- Baris Keempat -->
-                <div class="row">
-                  
-                    <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="tanggal_keluar" class="form-label">Tanggal Keluar</label>
-                          <input type="date" id="tanggal_keluar" class="form-control" name="tanggal_keluar" required />
-                        </div>
-                      </div>                      
-               
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="masa_pakai-column" class="form-label">Masa Pakai (bulan)</label>
-                          <input type="number" id="masa_pakai" class="form-control" name="masa_pakai" >
-                        </div>
-                        </div>
-                      
-                </div>
+                            {{-- Alert Error --}}
+                            @if (session('error'))
+                                <div class="alert alert-danger">
+                                    <span class="icon">⚠️</span> {{ session('error') }}
+                                </div>
+                            @endif
 
-  
-                <!-- Submit dan Reset -->
-                <div class="row">
-                  <div class="col-12 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
-                    <a href="{{ route('barang-keluar.index') }}" class="btn btn-light-secondary me-1 mb-1">Batal</a>
-        
-                  </div>
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <span class="icon">⚠️</span>
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            {{-- Baris 1: Barcode dan Pilih Barang --}}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="barcode" class="form-label">Scan Barcode Barang</label>
+                                        <video id="preview" style="width:100%; max-width:300px; border:1px solid #ccc;"></video>
+                                        <input type="hidden" id="barcode" class="form-control" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_barang" class="form-label">Pilih Barang</label>
+                                        <select id="id_barang" name="id_barang" class="form-control" required>
+                                            <option value="" disabled selected>-- Pilih Barang --</option>
+                                            @foreach($barangMasuk as $barang)
+                                                <option value="{{ $barang->id_barang }}" data-kode="{{ $barang->kode_barang }}">
+                                                    {{ $barang->kode_barang }} - {{ $barang->nama_barang }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Informasi Barang --}}
+                            <div id="info-barang" class="alert alert-info mt-3" style="display: none;">
+                                <p><strong>Nama Barang:</strong> <span id="nama-barang-info"></span></p>
+                                <p><strong>Kategori:</strong> <span id="kategori-barang-info"></span></p>
+                                <p><strong>Stok Tersedia:</strong> <span id="stok-barang-info"></span></p>
+                            </div>
+
+                            {{-- Baris 2: Penanggung Jawab & Jumlah --}}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="nama_penanggungjawab" class="form-label">Penanggung Jawab</label>
+                                        <input type="text" id="nama_penanggungjawab" name="nama_penanggungjawab" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
+                                        <input type="number" id="jumlah_keluar" name="jumlah_keluar" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Baris 3: Kondisi & Lokasi --}}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="kondisi" class="form-label">Kondisi Barang</label>
+                                        <select id="kondisi" name="kondisi" class="form-control" required>
+                                            <option value="" disabled selected>-- Pilih Kondisi --</option>
+                                            <option value="baru">Baru</option>
+                                            <option value="rusak">Rusak</option>
+                                            <option value="hilang">Hilang</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="lokasi" class="form-label">Lokasi</label>
+                                        <select id="lokasi" name="lokasi" class="form-control" required>
+                                            <option value="" disabled selected>Pilih Lokasi</option>
+                                            @foreach ($lokasi as $loc)
+                                                <option value="{{ $loc->id_lokasi }}">{{ $loc->nama_lokasi }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Baris 4: Tanggal & Masa Pakai --}}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="tanggal_keluar" class="form-label">Tanggal Keluar</label>
+                                        <input type="date" id="tanggal_keluar" name="tanggal_keluar" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="masa_pakai" class="form-label">Masa Pakai (bulan)</label>
+                                        <input type="number" id="masa_pakai" name="masa_pakai" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Tombol --}}
+                            <div class="row">
+                                <div class="col-12 d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
+                                    <a href="{{ route('barang-keluar.index') }}" class="btn btn-light-secondary me-1 mb-1">Batal</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-              </form>
             </div>
-          </div>
         </div>
-      </div>
     </div>
+
+    {{-- Style --}}
     <style>
-        .form-select {
-      max-height: 150px; /* Tinggi maksimum dropdown */
-      overflow-y: auto; /* Tambahkan scroll vertikal */
-    }
-    
-    .form-control, .form-select {
-      width: 100%; /* Pastikan semua elemen form lebar penuh */
-      box-sizing: border-box; /* Menghindari masalah padding */
-    }
-    
-    .card-body {
-      padding: 2rem;
-    }
-    
-    .form-label {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    
-    button {
-      min-width: 100px; /* Konsistensi lebar tombol */
-    }
-    .alert {
-                padding: 15px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-                font-size: 16px;
-            }
-            .alert-danger {
-                background-color: #f8d7da;
-                border-color: #f5c6cb;
-                color: #721c24;
-                display: flex;
-                align-items: center;
-            }
-            .alert-danger .icon {
-                font-size: 20px;
-                margin-right: 10px;
-                color: #721c24;
-            }
-            .alert-danger ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
-      </style>
-  </section>
-  
+        .form-label {
+            font-weight: bold;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: flex;
+            align-items: center;
+        }
+        .alert-danger .icon {
+            margin-right: 10px;
+        }
+    </style>
+</section>
 
-  <!-- // Basic multiple Column Form section end -->
-  <script>
-    // Ambil elemen dropdown kategori dan nama barang
-    const kategoriDropdown = document.getElementById('kategori_barang');
-    const namaBarangDropdown = document.getElementById('nama_barang');
+{{-- Script --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ asset('js/instascan.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const infoBox = $('#info-barang');
+        const namaBarangInfo = $('#nama-barang-info');
+        const kategoriBarangInfo = $('#kategori-barang-info');
+        const stokBarangInfo = $('#stok-barang-info');
 
-    // Event listener untuk ketika kategori barang berubah
-    kategoriDropdown.addEventListener('change', function () {
-        const selectedKategori = this.value; // Ambil nilai kategori yang dipilih
+        // Barcode scan event
+        $('#barcode').on('change', function () {
+            const kodeBarang = $(this).val();
+            if (!kodeBarang) return;
 
-        // Reset dropdown nama barang
-        namaBarangDropdown.value = "";
-        namaBarangDropdown.disabled = false;
+            $.get(`/barang/info/${kodeBarang}`, function (data) {
+                if (data.success) {
+                    namaBarangInfo.text(data.nama_barang);
+                    kategoriBarangInfo.text(data.kategori);
+                    stokBarangInfo.text(data.stok + ' unit');
+                    $('#jumlah_keluar').attr('max', data.stok);
+                    infoBox.show();
+                } else {
+                    alert('Barang tidak ditemukan!');
+                    infoBox.hide();
+                }
+            });
+        });
 
-        // Filter nama barang berdasarkan kategori yang dipilih
-        Array.from(namaBarangDropdown.options).forEach(option => {
-            if (option.dataset.kategori == selectedKategori || option.value == "") {
-                option.style.display = "block"; // Tampilkan opsi
+        // Event saat dropdown barang dipilih
+        $('#id_barang').on('change', function () {
+            const idBarang = $(this).val();
+            if (!idBarang) return;
+
+         $.get(`/dashboard/stok-barang/${idBarang}`, function (data) {
+                if (data.stok !== undefined) {
+                    stokBarangInfo.text(data.stok + ' unit');
+                    $('#jumlah_keluar').attr('max', data.stok);
+                    infoBox.show();
+                } else {
+                    stokBarangInfo.text('Data stok tidak ditemukan');
+                    infoBox.show();
+                }
+            }).fail(function () {
+                stokBarangInfo.text('Gagal mengambil data stok');
+                infoBox.show();
+            });
+        });
+
+        // Scanner Barcode
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5 });
+        scanner.addListener('scan', function (content) {
+            $('#barcode').val(content).trigger('change');
+
+            $.get(`/barang/cari-barcode/${content}`, function (res) {
+                if (res.status === 'success') {
+                    const id = res.data.id_barang;
+                    const exists = $(`#id_barang option[value="${id}"]`).length > 0;
+                    if (exists) {
+                        $('#id_barang').val(id).trigger('change');
+                        setTimeout(() => {
+                            alert(`✅ Barang ditemukan: ${res.data.kode_barang} - ${res.data.nama_barang}`);
+                        }, 300);
+                    } else {
+                        alert('⚠️ Barang ditemukan, tapi tidak tersedia di daftar dropdown.');
+                    }
+                } else {
+                    alert('❌ Barang tidak ditemukan di database.');
+                }
+            }).fail(() => {
+                alert('❌ Gagal mencari barang.');
+            });
+        });
+
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.length > 1) {
+                scanner.start(cameras[1]);
+            } else if (cameras.length > 0) {
+                scanner.start(cameras[0]);
             } else {
-                option.style.display = "none"; // Sembunyikan opsi
+                alert('Tidak ada kamera ditemukan.');
             }
+        }).catch(function (e) {
+            console.error(e);
+            alert('Tidak bisa mengakses kamera.');
         });
     });
 </script>
@@ -223,5 +254,4 @@
 <script src="{{asset('dist/assets/extensions/jquery/jquery.min.js')}}"></script>
 <script src="{{asset('dist/assets/extensions/parsleyjs/parsley.min.js')}}"></script>
 <script src="{{asset('dist/assets/static/js/pages/parsley.js')}}"></script>
-
 @endsection

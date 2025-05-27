@@ -93,7 +93,8 @@
                         <tr>
                             <td>{{ ($barangKeluar->currentPage() - 1) * $barangKeluar->perPage() + $loop->iteration }}</td>
                         <td>{{ $item->kategori->nama_kategori_barang }}</td>
-                        <td>{{ $item->nama_barang }}</td>
+                       <td>{{ $item->barang->nama_barang ?? '-' }}</td>
+
                         <td>{{ $item->jumlah_keluar }}</td>
                         <td>{{ ucfirst($item->kondisi) }}</td>
                         <td>{{ $item->lokasi->nama_lokasi }}</td>

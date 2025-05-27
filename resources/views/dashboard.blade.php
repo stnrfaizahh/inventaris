@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(view:'layouts.app')
 
 @section('title','E-Invensi-Dashboard')
 @section('header','Data Barang')
@@ -20,12 +20,12 @@
                                     <h6 class="text-muted font-semibold">Barang Masuk</h6>
                                     <h6 class="font-extrabold mb-0">{{ $totalBarangMasuk }}</h6>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3 col-md-6">
-                    <div class="card"> 
+                    <div class="card">
                         <div class="card-body px-4 py-4-5">
                             <div class="row">
                                 <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
@@ -181,7 +181,7 @@
         
                     @foreach ($stokBarang as $index => $barang)
                         <tr>
-                             <td class="text-center">{{ $counter++ }}</td> 
+                             <td class="text-center">{{ $counter++ }}</td>
                             <td>{{ $barang->kategori->nama_kategori_barang }}</td>
                             <td>{{ $barang->nama_barang }}</td>
                             <td class="text-center">{{ $barang->jumlah_masuk }}</td>
@@ -207,7 +207,7 @@
 <script src="{{asset('dist/assets/extensions/jquery/jquery.min.js')}}"></script>
 <script src="{{asset('dist/assets/extensions/datatables.net/js/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('dist/assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
-<script src="{{asset('dist/assets/static/js/pages/datatables.js')}}"></script>  
+<script src="{{asset('dist/assets/static/js/pages/datatables.js')}}"></script>
 <!-- Need: Apexcharts -->
 <script src="{{asset ('dist/assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
 <script src="{{asset ('dist/assets/static/js/pages/dashboard.js') }}"></script>

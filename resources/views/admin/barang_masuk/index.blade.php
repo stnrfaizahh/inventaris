@@ -104,7 +104,7 @@
                         <td>{{ $barang->kategori->nama_kategori_barang }}</td>
 
                             {{-- Menampilkan nama barang --}}
-                        <td>{{ $barang->nama_barang }}</td>
+                        <td>{{ $barang->barang->nama_barang ?? '-' }}</td>
 
                             {{-- Menampilkan sumber barang --}}
                         <td>{{ $barang->sumber_barang }}</td>

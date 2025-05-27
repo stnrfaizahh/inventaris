@@ -13,14 +13,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangMasukController extends Controller
 {
-    public function create()
-    {
+    public function create(){
         $barang = Barang::getOrderedList();
         $lokasi = Lokasi::all();
         return view('admin.barang_masuk.create', compact('barang', 'lokasi'));
     }
-    public function cariBarcode($barcode)
-    {
+    public function cariBarcode($barcode){
     $barang = Barang::where('barcode', $barcode)->first();
 
     if (!$barang) {
@@ -38,8 +36,8 @@ class BarangMasukController extends Controller
     ]);
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
+       
         $request->validate([
             'id_barang' => 'required|exists:barang,id_barang',
             'sumber_barang' => 'required|string|max:255',
@@ -66,7 +64,7 @@ class BarangMasukController extends Controller
     }
     public function index(Request $request)
     {
-        $query = BarangMasuk::with(['kategori', 'lokasi']);
+        $query = BarangMasuk::with(['kategori', 'lokasi', 'barang']);
 
         // Filter berdasarkan lokasi
         if ($request->filled('lokasi')) {

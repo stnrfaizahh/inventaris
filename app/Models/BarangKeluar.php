@@ -11,6 +11,7 @@ class BarangKeluar extends Model
     protected $primaryKey = 'id_barang_keluar';
 
     protected $fillable = [
+        'id_barang',
         'id_kategori_barang',
         'nama_barang',
         'jumlah_keluar',
@@ -19,8 +20,14 @@ class BarangKeluar extends Model
         'tanggal_keluar',
         'masa_pakai',
         'tanggal_exp',
-        'nama_penanggungjawab'
+        'nama_penanggungjawab',
+        'kode_barang_keluar',
     ];
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang');
+    }
 
     public function kategori()
     {
