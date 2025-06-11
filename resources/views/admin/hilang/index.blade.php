@@ -87,17 +87,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($barangKeluar as $item)
+                        @forelse ($hilang as $item)
                         <tr>
-                            <td>{{ ($barangKeluar->currentPage() - 1) * $barangKeluar->perPage() + $loop->iteration }}</td>
-                        <td>{{ $item->kategori->nama_kategori_barang }}</td>
-                        <td>{{ $item->nama_barang }}</td>
-                        <td>{{ $item->jumlah_keluar }}</td>
-                        <td>{{ $item->lokasi->nama_lokasi }}</td>
-                        <td>{{ $item->tanggal_keluar }}</td>
-                        <td>{{ $item->hilang->tanggal_hilang ?? '-' }}</td>
-                        <td>{{ $item->nama_penanggungjawab }}</td>
-                        <td>{{ $item->hilang->keterangan ?? '-' }}</td>    
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $item->barangKeluar->kategori->nama_kategori_barang ?? '-' }}</td>
+                        <td>{{ $item->barangKeluar->barang->nama_barang ?? $item->barangKeluar->nama_barang ?? '-' }}</td>
+                        <td>{{ $item->jumlah_hilang }}</td>
+                        <td>{{ $item->barangKeluar->lokasi->nama_lokasi ?? '-' }}</td>
+                        <td>{{ $item->barangKeluar->tanggal_keluar ?? '-' }}</td>
+                        <td>{{ $item->tanggal_hilang }}</td>
+                        <td>{{ $item->barangKeluar->nama_penanggungjawab ?? '-' }}</td>
+                        <td>{{ $item->keterangan ?? '-' }}</td>
                         </tr>
                         @empty
                         <tr>

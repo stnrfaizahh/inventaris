@@ -1,4 +1,4 @@
-@extends(view:'layouts.app')
+@extends('layouts.app')
 
 @section('title','E-Invensi-Dashboard')
 @section('header','Data Barang')
@@ -183,7 +183,7 @@
                         <tr>
                              <td class="text-center">{{ $counter++ }}</td>
                             <td>{{ $barang->kategori->nama_kategori_barang }}</td>
-                            <td>{{ $barang->nama_barang }}</td>
+                            <td>{{ $barang->barang->nama_barang ?? '-' }}</td>
                             <td class="text-center">{{ $barang->jumlah_masuk }}</td>
                             <td class="text-center">{{ $barang->jumlah_keluar }}</td>
                             <td class="text-center">{{ $barang->stok }}</td>
@@ -209,8 +209,9 @@
 <script src="{{asset('dist/assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
 <script src="{{asset('dist/assets/static/js/pages/datatables.js')}}"></script>
 <!-- Need: Apexcharts -->
-<script src="{{asset ('dist/assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
-<script src="{{asset ('dist/assets/static/js/pages/dashboard.js') }}"></script>
+<script src="{{asset('dist/assets/extensions/apexcharts/apexcharts.min.js')}}"></script>
+<script src="{{asset('dist/assets/static/js/pages/dashboard.js')}}"></script>
+
  </section>
     </section>
     @endsection

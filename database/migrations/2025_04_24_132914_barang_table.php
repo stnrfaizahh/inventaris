@@ -17,8 +17,6 @@ return new class extends Migration
             $table->string('kode_barang', 10)->unique(); // tetap gunakan format seperti sekarang
             $table->string('nama_barang');
             $table->string('barcode')->unique(); // kode barcode unik untuk 1 jenis barang
-            $table->text('spesifikasi')->nullable(); 
-            $table->string('foto')->nullable(); 
             $table->timestamps();
         
             $table->foreign('id_kategori_barang')->references('id_kategori_barang')->on('kategori_barang')->onDelete('cascade');

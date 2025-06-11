@@ -28,27 +28,35 @@ class DashboardController extends Controller
             ->pluck('total', 'kondisi');
 
         // Ambil data barang masuk, dan kelompokkan berdasarkan kategori dan nama barang
-        $barangMasuk = BarangMasuk::select('id_kategori_barang', 'nama_barang')
-            ->selectRaw('SUM(jumlah_masuk) as jumlah_masuk')
-            ->when($search, function ($query, $search) {
-                return $query->where('nama_barang', 'like', "%{$search}%");
-            })
-            ->groupBy('id_kategori_barang', 'nama_barang')
-            ->get();
+       $barangMasuk = BarangMasuk::with('barang')
+        ->select('id_kategori_barang', 'id_barang')
+        ->selectRaw('SUM(jumlah_masuk) as jumlah_masuk')
+        ->when($search, function ($query, $search) {
+            return $query->whereHas('barang', function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%");
+            });
+        })
+        ->groupBy('id_kategori_barang', 'id_barang')
+        ->get();
+
 
         // Ambil data barang keluar, dan kelompokkan berdasarkan kategori dan nama barang
-        $barangKeluar = BarangKeluar::select('id_kategori_barang', 'nama_barang')
+        $barangKeluar = BarangKeluar::with('barang') // tambahkan ini
+            ->select('id_kategori_barang', 'id_barang')
             ->selectRaw('SUM(jumlah_keluar) as jumlah_keluar')
             ->when($search, function ($query, $search) {
-                return $query->where('nama_barang', 'like', "%{$search}%");
+                return $query->whereHas('barang', function ($q) use ($search) {
+                    $q->where('nama_barang', 'like', "%{$search}%");
+                });
             })
-            ->groupBy('id_kategori_barang', 'nama_barang')
+            ->groupBy('id_kategori_barang', 'id_barang')
             ->get();
 
+
         // Gabungkan data barang masuk dan barang keluar
-        $stokBarang = $barangMasuk->map(function ($barang) use ($barangKeluar) {
+       $stokBarang = $barangMasuk->map(function ($barang) use ($barangKeluar) {
             $keluar = $barangKeluar->where('id_kategori_barang', $barang->id_kategori_barang)
-                ->where('nama_barang', $barang->nama_barang)
+                ->where('id_barang', $barang->id_barang)
                 ->first();
 
             $barang->jumlah_keluar = $keluar ? $keluar->jumlah_keluar : 0;
@@ -57,8 +65,9 @@ class DashboardController extends Controller
             return $barang;
         });
 
+
         $stokBarang = $stokBarang->sortBy(function ($barang) {
-            return $barang->kategori->nama_kategori_barang;
+            return optional($barang->barang->kategori)->nama_kategori_barang;
         });
 
 

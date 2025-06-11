@@ -28,7 +28,7 @@
               @endif
 
               {{-- Filter Kategori dan Nama Barang --}}
-              <div class="row mb-3">
+                <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="kategori_barang">Kategori Barang</label>
                   <select id="kategori_barang" class="form-control">
@@ -41,13 +41,21 @@
                 <div class="col-md-6">
                   <label for="nama_barang">Nama Barang</label>
                   <select id="nama_barang" class="form-control">
-                    <option value="" selected disabled>-- Pilih Barang --</option>
-                    @foreach ($barangKeluar as $bk)
-                      <option value="{{ $bk->nama_barang }}" data-kategori="{{ $bk->id_kategori_barang }}">{{ $bk->nama_barang }}</option>
-                    @endforeach
-                  </select>
+                  <option value="" selected disabled>-- Pilih Barang --</option>
+                  @php
+                    $namaBarangUnik = collect($barangKeluar)->unique('id_barang');
+                  @endphp
+                  @foreach ($namaBarangUnik as $bk)
+                    <option value="{{ $bk->id_barang }}"
+                            data-kategori="{{ $bk->id_kategori_barang }}">
+                      {{ $bk->barang->nama_barang }}
+                    </option>
+                  @endforeach
+                </select>
+
                 </div>
               </div>
+
 
               {{-- Tabel Pilihan Barang Keluar --}}
               <div class="table-responsive">
@@ -67,12 +75,23 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach ($barangKeluar as $bk)
-                    <tr data-kategori="{{ $bk->id_kategori_barang }}" data-nama="{{ $bk->nama_barang }}">
-                      <td><input type="radio" name="id_barang_keluar" value="{{ $bk->id_barang_keluar }}"></td>
-                      <td>{{ $loop->iteration }}</td> <!-- Nomor urut -->
+                  @foreach ($barangKeluar as $bk)
+                    @php
+                      $hilangManual = optional($bk->hilang)->sum('jumlah_hilang') ?? 0;
+                      $hilangOtomatis = $bk->kondisi === 'HILANG' ? $bk->jumlah_keluar : 0;
+                      $tersisa = $bk->jumlah_keluar - $hilangManual - $hilangOtomatis;
+                    @endphp
+                    <tr data-kategori="{{ $bk->id_kategori_barang }}" data-nama="{{ $bk->id_barang }}" data-tersisa="{{ $tersisa }}">
+                      <td>
+                        @if ($tersisa > 0)
+                          <input type="radio" name="id_barang_keluar" value="{{ $bk->id_barang_keluar }}">
+                        @else
+                          <span class="text-danger">Habis</span>
+                        @endif
+                      </td>
+                      <td>{{ $loop->iteration }}</td>
                       <td>{{ $bk->kategori->nama_kategori_barang }}</td>
-                      <td>{{ $bk->nama_barang }}</td>
+                      <td>{{ $bk->barang->nama_barang }}</td>
                       <td>{{ $bk->jumlah_keluar }}</td>
                       <td>{{ ucfirst($bk->kondisi) }}</td>
                       <td>{{ $bk->lokasi->nama_lokasi }}</td>
@@ -80,7 +99,8 @@
                       <td>{{ $bk->tanggal_exp }}</td>
                       <td>{{ $bk->nama_penanggungjawab }}</td>
                     </tr>
-                    @endforeach
+                  @endforeach
+
                   </tbody>
                 </table>
               </div>
@@ -127,58 +147,61 @@
 <script>
     
     $(document).ready(function () {
-      const table = $('#tabel-barang-keluar').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        ordering: false,
-        language: {
-          search: "Cari:",
-          paginate: {
-            previous: "Sebelumnya",
-            next: "Berikutnya"
-          },
-          emptyTable: "Tidak ada data tersedia",
-          info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
-          infoEmpty: "Menampilkan 0 data",
-        }
-      });
-  
-      // Simpan nilai filter
-      let selectedKategori = '';
-      let selectedNama = '';
-  
-      // Filter Kategori → isi dropdown Nama Barang
-      $('#kategori_barang').on('change', function () {
-        selectedKategori = this.value;
-        selectedNama = '';
-  
-        $('#nama_barang').val('');
-        $('#nama_barang option').hide();
-        $('#nama_barang option[data-kategori="' + selectedKategori + '"]').show();
-  
-        table.draw();
-      });
-  
-      // Filter Nama Barang
-      $('#nama_barang').on('change', function () {
-        selectedNama = this.value;
-        table.draw();
-      });
-  
-      // Custom filter DataTables
-      $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        const kategoriCell = table.row(dataIndex).node().getAttribute('data-kategori');
-        const namaCell = table.row(dataIndex).node().getAttribute('data-nama');
-  
-        if (
-          (!selectedKategori || kategoriCell == selectedKategori) &&
-          (!selectedNama || namaCell == selectedNama)
-        ) {
-          return true;
-        }
-        return false;
-      });
+  const table = $('#tabel-barang-keluar').DataTable({
+    pageLength: 10,
+    lengthChange: false,
+    ordering: false,
+    language: {
+      search: "Cari:",
+      paginate: {
+        previous: "Sebelumnya",
+        next: "Berikutnya"
+      },
+      emptyTable: "Tidak ada data tersedia",
+      info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+      infoEmpty: "Menampilkan 0 data",
+    }
+  });
+
+  let selectedKategori = '';
+  let selectedNama = '';
+
+  $('#kategori_barang').on('change', function () {
+    selectedKategori = this.value;
+    selectedNama = '';
+
+    $('#nama_barang').val('');
+    $('#nama_barang option').each(function () {
+      const kategori = $(this).data('kategori');
+      if (!kategori) return; // skip default option
+      if (kategori == selectedKategori) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
     });
+
+    table.draw();
+  });
+
+  $('#nama_barang').on('change', function () {
+    selectedNama = this.value;
+    table.draw();
+  });
+
+  // Filter data di tabel berdasarkan dropdown
+  $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+    const row = table.row(dataIndex).node();
+    const rowKategori = $(row).data('kategori');
+    const rowNama = $(row).data('nama');
+    const rowTersisa = $(row).data('tersisa');
+
+    return (!selectedKategori || rowKategori == selectedKategori) &&
+           (!selectedNama || rowNama == selectedNama) &&
+           (rowTersisa > 0);
+  });
+});
+
   </script>
   
 <script src="{{asset('dist/assets/static/js/components/dark.js')}}"></script>

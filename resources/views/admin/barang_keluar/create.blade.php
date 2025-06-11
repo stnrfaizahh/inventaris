@@ -46,12 +46,17 @@
                                         <label for="id_barang" class="form-label">Pilih Barang</label>
                                         <select id="id_barang" name="id_barang" class="form-control" required>
                                             <option value="" disabled selected>-- Pilih Barang --</option>
-                                            @foreach($barangMasuk as $barang)
-                                                <option value="{{ $barang->id_barang }}" data-kode="{{ $barang->kode_barang }}">
-                                                    {{ $barang->kode_barang }} - {{ $barang->nama_barang }}
-                                                </option>
+                                            @foreach($barangMasuk as $kategori => $listBarang)
+                                                <optgroup label="{{ $kategori }}">
+                                                    @foreach($listBarang as $barang)
+                                                        <option value="{{ $barang->id_barang }}" data-kode="{{ $barang->kode_barang }}">
+                                                            {{ $barang->kode_barang }} - {{ $barang->nama_barang }}
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
                                             @endforeach
                                         </select>
+                                         <button type="button" id="ubah-barang" class="btn btn-warning btn-sm mt-2">Ubah Barang</button>
                                     </div>
                                 </div>
                             </div>
@@ -209,6 +214,9 @@
             });
         });
 
+        $('#ubah-barang').on('click', function () {
+            $('#id_barang').prop('disabled', false); // aktifkan kembali dropdown
+        });
         // Scanner Barcode
         let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5 });
         scanner.addListener('scan', function (content) {
@@ -220,6 +228,7 @@
                     const exists = $(`#id_barang option[value="${id}"]`).length > 0;
                     if (exists) {
                         $('#id_barang').val(id).trigger('change');
+                        $('#id_barang').prop('disabled', true);
                         setTimeout(() => {
                             alert(`✅ Barang ditemukan: ${res.data.kode_barang} - ${res.data.nama_barang}`);
                         }, 300);

@@ -50,7 +50,7 @@
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="nama_barang">Nama Barang</label>
-                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" disabled>
+                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barang->barang->nama_barang ?? '-' }}" disabled>
                                     </div>
                                 </div>
                             </div>

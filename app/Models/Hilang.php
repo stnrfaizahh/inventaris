@@ -24,4 +24,9 @@ class Hilang extends Model
     {
         return $this->belongsTo(BarangKeluar::class, 'id_barang_keluar');
     }
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang');
+    }
+
 }

@@ -86,14 +86,14 @@
                 <div class="cell info">
                     <h2>{{ $item->kode_barang_keluar }}</h2>
                     <hr style="border: none; border-top: 1px solid #000;">
-                    <h4>{{ $item->nama_barang }}</h4>
+                    <h4>{{ $item->barang->nama_barang }}</h4>
                 </div>
 
                 <div class="cell qr">
                     @php
                         $qrData =
                             "Kategori: {$item->kategori->nama_kategori_barang}\n" .
-                            "Nama: {$item->nama_barang}\n" .
+                            "Nama: {$item->barang->nama_barang}\n" .
                             "Lokasi: {$item->lokasi->nama_lokasi}\n" .
                             "Tanggal Keluar: " . \Carbon\Carbon::parse($item->tanggal_keluar)->format('d-m-Y') . "\n" .
                             "Tanggal Exp: " . \Carbon\Carbon::parse($item->tanggal_exp)->format('d-m-Y');

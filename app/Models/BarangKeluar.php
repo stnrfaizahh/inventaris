@@ -13,7 +13,6 @@ class BarangKeluar extends Model
     protected $fillable = [
         'id_barang',
         'id_kategori_barang',
-        'nama_barang',
         'jumlah_keluar',
         'kondisi',
         'id_lokasi',
@@ -39,6 +38,6 @@ class BarangKeluar extends Model
     }
     public function hilang()
     {
-    return $this->hasOne(Hilang::class, 'id_barang_keluar', 'id_barang_keluar');
+    return $this->hasMany(Hilang::class, 'id_barang_keluar', 'id_barang_keluar');
     }
 }

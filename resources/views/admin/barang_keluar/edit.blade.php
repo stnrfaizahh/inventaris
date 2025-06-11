@@ -33,18 +33,13 @@
                             @method('PUT')
 
                             <div class="row">
+                                <input type="hidden" name="id_barang" value="{{ $barangKeluar->id_barang }}">
+
                                 <!-- Kategori Barang -->
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="kategori_barang" class="form-label">Kategori Barang</label>
-                                        <select name="kategori_barang" id="kategori_barang" class="form-control" required>
-                                            <option value="">-- Pilih Kategori --</option>
-                                            @foreach($kategori_barang as $kategori)
-                                                <option value="{{ $kategori->id_kategori_barang }}" {{ $barangKeluar->id_kategori_barang == $kategori->id_kategori_barang ? 'selected' : '' }}>
-                                                    {{ $kategori->nama_kategori_barang }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" class="form-control" value="{{ $barangKeluar->barang->kategori->nama_kategori_barang ?? '-' }}" disabled>
                                     </div>
                                 </div>
 
@@ -52,7 +47,7 @@
                                 <div class="col-md-6 col-12">
                                     <div class="form-group">
                                         <label for="nama_barang" class="form-label">Barang</label>
-                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barangKeluar->nama_barang }}" required>
+                                        <input type="text" name="nama_barang" id="nama_barang" class="form-control" value="{{ $barangKeluar->barang->nama_barang ?? '-' }}" disabled>
                                     </div>
                                 </div>
 

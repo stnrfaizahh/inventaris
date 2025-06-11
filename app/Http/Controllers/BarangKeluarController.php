@@ -19,8 +19,10 @@ class BarangKeluarController extends Controller
 {
     public function create()
     {
-        $barangMasuk = Barang::with('kategori')->get();
-
+       $barangMasuk = Barang::with('kategori')
+            ->get()
+            ->sortBy('kode_barang')
+            ->groupBy(fn($item) => $item->kategori->nama_kategori_barang);
         $lokasi = Lokasi::all();
 
         return view('admin.barang_keluar.create', compact('barangMasuk', 'lokasi'));
@@ -86,7 +88,6 @@ class BarangKeluarController extends Controller
     BarangKeluar::create([
         'id_barang' => $barang->id_barang,
         'id_kategori_barang' => $barang->id_kategori_barang,
-        'nama_barang' => $barang->nama_barang,
         'jumlah_keluar' => $request->jumlah_keluar,
         'kondisi' => $request->kondisi,
         'id_lokasi' => $idLokasi,
@@ -150,55 +151,46 @@ class BarangKeluarController extends Controller
     }
 
     // Mengupdate data barang keluar
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'kategori_barang' => 'required|exists:kategori_barang,id_kategori_barang',
-            'nama_barang' => 'required|string|max:255',
-            'jumlah_keluar' => 'required|integer|min:1',
-            'tanggal_keluar' => 'required|date',
-            'masa_pakai' => 'required|integer|min:1',
-        ]);
+ public function update(Request $request, $id)
+{
+    $request->validate([
+        'jumlah_keluar' => 'required|integer|min:1',
+        'tanggal_keluar' => 'required|date',
+        'masa_pakai' => 'required|integer|min:1',
+        'kondisi' => 'required|string',
+        'lokasi' => 'required|exists:lokasi,id_lokasi',
+        'nama_penanggungjawab' => 'required|string',
+    ]);
 
-        $barangKeluar = BarangKeluar::findOrFail($id);
+    $barangKeluar = BarangKeluar::findOrFail($id);
 
-        // Periksa apakah kategori dan nama barang sesuai dengan data barang masuk
-        $barangMasuk = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->first();
+   // Hitung stok berdasarkan semua barang masuk dan keluar (kecuali record yang sedang diedit)
+    $jumlahMasuk = BarangMasuk::where('id_barang', $barangKeluar->id_barang)->sum('jumlah_masuk');
+    $jumlahKeluar = BarangKeluar::where('id_barang', $barangKeluar->id_barang)
+                            ->where('id_barang_keluar', '!=', $id)
+                            ->sum('jumlah_keluar');
+    $stokTersedia = $jumlahMasuk - $jumlahKeluar;
 
-        if (!$barangMasuk) {
-            return redirect()->back()->withErrors('Barang tidak ditemukan pada data barang masuk.')->withInput();
-        }
-
-        // Hitung stok saat ini berdasarkan data barang masuk dan barang keluar
-        $stokTersedia = BarangMasuk::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->sum('jumlah_masuk')
-            - BarangKeluar::where('id_kategori_barang', $request->kategori_barang)
-            ->where('nama_barang', $request->nama_barang)
-            ->sum('jumlah_keluar');
-
-        // Periksa apakah jumlah keluar yang diubah melebihi stok tersedia
-        if ($stokTersedia + $barangKeluar->jumlah_keluar - $request->jumlah_keluar < 0) {
-            return redirect()->back()->withErrors('Jumlah keluar melebihi stok yang tersedia.');
-        }
-
-        // Update data barang keluar
-        $barangKeluar->update([
-            'id_kategori_barang' => $request->kategori_barang,
-            'nama_barang' => $request->nama_barang,
-            'jumlah_keluar' => $request->jumlah_keluar,
-            'kondisi' => $request->kondisi,
-            'id_lokasi' => $request->lokasi,
-            'tanggal_keluar' => $request->tanggal_keluar,
-            'masa_pakai' => $request->masa_pakai,
-            'nama_penanggungjawab' => $request->nama_penanggungjawab,
-            'tanggal_exp' => Carbon::parse($request->tanggal_keluar)->addMonths((int)$request->masa_pakai),
-        ]);
-
-        return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil diperbarui.');
+    if ($request->jumlah_keluar > $stokTersedia) {
+        return redirect()->back()->withErrors(['jumlah_keluar' => 'Jumlah keluar melebihi stok tersedia (' . $stokTersedia . ').'])->withInput();
     }
+
+    $tanggalExp = Carbon::parse($request->tanggal_keluar)->addMonths((int)$request->masa_pakai);
+
+    $barangKeluar->update([
+        'jumlah_keluar' => $request->jumlah_keluar,
+        'kondisi' => $request->kondisi,
+        'id_lokasi' => $request->lokasi,
+        'tanggal_keluar' => $request->tanggal_keluar,
+        'masa_pakai' => $request->masa_pakai,
+        'nama_penanggungjawab' => $request->nama_penanggungjawab,
+        'tanggal_exp' => $tanggalExp,
+    ]);
+
+    return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil diperbarui.');
+}
+
+
 
     public function destroy($id)
     {

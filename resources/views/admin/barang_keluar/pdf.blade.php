@@ -10,45 +10,72 @@
             font-size: 12px;
             margin: 20px;
         }
+
         .kop-surat {
-            text-align: center;
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
-        .kop-surat h3, .kop-surat h4 {
+
+        .kop-surat img {
+            width: 130px;
+            height: 130px;
+            margin-right: 20px;
+        }
+
+        .kop-surat .text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .kop-surat h2, .kop-surat h3, .kop-surat h4, .kop-surat p {
             margin: 0;
         }
+
+        hr.garis-kop {
+            border: 2px solid black;
+            margin: 10px 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        table, th, td {
+
+        table.tabel-barang-keluar, 
+        table.tabel-barang-keluar th, 
+        table.tabel-barang-keluar td {
             border: 1px solid black;
+            border-collapse: collapse;
         }
+
         th, td {
             padding: 8px;
             text-align: center;
+        }
+        .ttd-wrapper {
+            page-break-inside: avoid; /* Jangan pisah di tengah */
+            margin-top: 30px;
         }
         .ttd {
             margin-top: 50px;
             text-align: center;
         }
-        .container {
-            position: relative;
-            height: 100%;
-            min-height: 100vh; /* Memastikan konten mengisi seluruh halaman */
-        }
+
         .ttd div {
             display: inline-block;
             width: 45%;
-            text-align: center;
         }
+
         .left-ttd {
             text-align: left;
         }
+
         .right-ttd {
             text-align: right;
         }
+
         .page-break {
             page-break-before: always;
         }
@@ -56,10 +83,32 @@
 </head>
 <body>
     <div class="container">
-        <div class="kop-surat">
-            <h2>DAFTAR INVENTARIS BARANG </h2>
+        <!-- KOP SURAT -->
+        <div class="kop-surat" style="margin-bottom: 10px;">
+            <table style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 90px;">
+                        <img src="{{ public_path('images/logo.png') }}" alt="Logo Sekolah" width="90">
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="line-height: 1.3;">
+                            <h3 style="margin: 0;">YAYASAN NURUL MASYITHAH LUMAJANG (YNML)</h3>
+                            <h2 style="margin: 0;">SEKOLAH DASAR ISLAM TOMPOKERSAN LUMAJANG</h2>
+                            <p style="margin: 0;"><em>(FULL DAY SCHOOL – FULL DAY EDUCATION)</em></p>
+                            <p style="margin: 0;"><strong>TAQWA - TERAMPIL - UNGGUL</strong></p>
+                            <p style="margin: 0; font-size: 11px;">
+                                Jl. Kapten Kyai Ilyas 12 Telp. (0334) 882547, Fax 893789 Lumajang <br>
+                                Website: https://www.sditompokersan.sch.id | Email: sdi.tompokersanlumajang@gmail.com <br>
+                                NPSN: 20521342 | NSS: 102052110025
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <hr style="border: 2px solid black; margin: 5px 0 10px 0;">
+        </div>
+        <div style="text-align: center; margin-bottom: 10px;">
             <h3>Laporan Barang Keluar</h3>
-            <h4>SD ISLAM TOMPOKERSAN LUMAJANG</h4>
             <h4>TAHUN PELAJARAN {{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar)) : 'Tidak Diketahui' }}/{{ $barangKeluar->isNotEmpty() ? date('Y', strtotime($barangKeluar->first()->tanggal_keluar . ' +1 year')) : '' }}</h4> 
         </div>
         <h4 style="text-align: left">
@@ -67,8 +116,7 @@
         {{-- @if(request('tahun')) Tahun: {{ request('tahun') }} | @endif
         @if(request('bulan')) Bulan: {{ DateTime::createFromFormat('!m', request('bulan'))->format('F') }} @endif --}}
         </h4>
-        <hr>
-        <table>
+        <table class="tabel-barang-keluar">
             <thead>
                 <tr>
                     <th>No</th>
@@ -86,7 +134,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->kategori->nama_kategori_barang }}</td>
-                        <td>{{ $item->nama_barang }}</td>
+                        <td>{{ $item->barang->nama_barang }}</td>
                         <td>{{ $item->jumlah_keluar }}</td>
                         <td>{{ ucfirst($item->kondisi) }}</td>
                         <td>{{ $item->tanggal_keluar }}</td>
@@ -98,6 +146,7 @@
         </table>
 
         <!-- Bagian Tanda Tangan -->
+        <div class="ttd-wrapper">
         <div class="ttd">
             <div class="left-ttd">
                 <p>Mengetahui,</p>

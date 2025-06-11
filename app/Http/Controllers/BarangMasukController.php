@@ -52,7 +52,6 @@ class BarangMasukController extends Controller
             'id_barang' => $barang->id_barang,
             'kode_barang' => $barang->kode_barang,
             'id_kategori_barang' => $barang->id_kategori_barang,
-            'nama_barang' => $barang->nama_barang,
             'sumber_barang' => $request->sumber_barang,
             'jumlah_masuk' => $request->jumlah_masuk,
             'kondisi' => $request->kondisi,
