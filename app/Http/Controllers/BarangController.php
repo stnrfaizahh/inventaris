@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use App\Models\Barang;
 use App\Models\KategoriBarang;
 use Illuminate\Support\Str;
@@ -106,40 +107,40 @@ class BarangController extends Controller
     }
 
     // Print QR Code to PDF
-    public function printQr($id)
-    {
-        $barang = Barang::findOrFail($id);
-        return Pdf::loadView('admin.barang.qrcode', compact('barang'))
-            ->setPaper('A4', 'portrait')
-            ->stream('label-barang-' . $barang->kode_barang . '.pdf');
-    }
+   public function printQr($id)
+{
+    $barang = Barang::with(['kategori'])->findOrFail($id);
 
-    // Form for cetak satu barang
-    public function formCetakSatu($id)
-    {
-        $barang = Barang::findOrFail($id);
-        return view('admin.barang.cetak_satu_form', compact('barang'));
-    }
+    $qrData = [
+        'Kode' => $barang->kode_barang,
+        'Nama Barang' => $barang->nama_barang,
+        'Kategori' => $barang->kategori->nama_kategori_barang ?? '-',
+    ];
 
-    // Cetak satu barang
-    public function cetakSatu(Request $request)
-    {
-        $request->validate([
-            'id_barang' => 'required|exists:barang,id_barang',
-            'jumlah' => 'required|integer|min:1'
+    $qrContent = json_encode($qrData);
+
+    $items = collect([$barang]); // Agar bisa pakai foreach jika layout sama
+    return view('admin.barang.qrcode', compact('items', 'qrContent'));
+}
+
+public function info($kodeBarang)
+{
+    $barang = Barang::with('kategori')->where('kode_barang', $kodeBarang)->first();
+
+    if ($barang) {
+        $jumlahMasuk = $barang->barangMasuk()->sum('jumlah_masuk');
+        $jumlahKeluar = $barang->barangKeluar()->sum('jumlah_keluar');
+        $stok = $jumlahMasuk - $jumlahKeluar;
+
+        return response()->json([
+            'success' => true,
+            'nama_barang' => $barang->nama_barang,
+            'kategori' => $barang->kategori->nama_kategori_barang ?? '-',
+            'stok' => $stok
         ]);
-
-        $barang = Barang::findOrFail($request->id_barang);
-        $jumlah = $request->jumlah;
-
-        $barangList = collect();
-        for ($i = 0; $i < $jumlah; $i++) {
-            $barangList->push($barang);
-        }
-
-        $pdf = PDF::loadView('admin.barang.qrcode', compact('barangList'))
-            ->setPaper('A4', 'portrait');
-
-        return $pdf->stream('barcode-' . $barang->kode_barang . '.pdf');
     }
+
+    return response()->json(['success' => false], 404);
+}
+
 }

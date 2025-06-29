@@ -115,7 +115,7 @@
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Hilang</label>
-                  <input type="date" name="tanggal_hilang" class="form-control" required>
+                  <input type="date" name="tanggal_hilang" class="form-control" value="{{old('tanggal_hilang', date('Y-m-d')) }}" required>
                 </div>
               </div>
 

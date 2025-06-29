@@ -91,12 +91,7 @@
 
                 <div class="cell qr">
                     @php
-                        $qrData =
-                            "Kategori: {$item->kategori->nama_kategori_barang}\n" .
-                            "Nama: {$item->barang->nama_barang}\n" .
-                            "Lokasi: {$item->lokasi->nama_lokasi}\n" .
-                            "Tanggal Keluar: " . \Carbon\Carbon::parse($item->tanggal_keluar)->format('d-m-Y') . "\n" .
-                            "Tanggal Exp: " . \Carbon\Carbon::parse($item->tanggal_exp)->format('d-m-Y');
+                        $qrData = $item->kode_barang_keluar;
                         $qr = base64_encode(QrCode::format('png')->size(150)->margin(1)->generate($qrData));
                     @endphp
                     <img src="data:image/png;base64,{{ $qr }}" alt="QR Code">
