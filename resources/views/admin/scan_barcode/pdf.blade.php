@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <h3>Laporan Inventaris Barang di tiap lokasi</h3>
+    <h3>Laporan Inventaris Barang</h3>
     <table>
         <thead>
             <tr>
