@@ -66,8 +66,6 @@ class HilangController extends Controller
     return redirect()->route('hilang.index')->with('success', 'Data barang hilang berhasil ditambahkan.');
 }
 
-
-    // Tampilkan daftar barang hilang
     public function index(Request $request)
 {
     // Ambil data hilang manual
@@ -92,6 +90,9 @@ class HilangController extends Controller
     }
 
     $hilangManual = $queryManual->get();
+    $hilangManual->each(function ($item) {
+        $item->tipe = 'manual';
+    });
 
     // Ambil data barang keluar dengan kondisi HILANG (otomatis)
     $hilangOtomatis = BarangKeluar::with(['kategori', 'lokasi', 'barang'])
@@ -114,6 +115,7 @@ class HilangController extends Controller
     // Ubah data otomatis agar sesuai dengan struktur Hilang (pakai collection manual)
     $hilangOtomatisCollection = $hilangOtomatis->map(function ($item) {
         return (object)[
+            'tipe' => 'otomatis',
             'barangKeluar' => $item,
             'jumlah_hilang' => $item->jumlah_keluar,
             'tanggal_hilang' => $item->tanggal_keluar,
@@ -132,7 +134,46 @@ class HilangController extends Controller
     return view('admin.hilang.index', compact('hilang', 'lokasi'));
 }
 
-    // Export PDF laporan barang hilang
+public function edit($id)
+{
+    $hilang = Hilang::with(['barangKeluar.kategori', 'barangKeluar.lokasi', 'barangKeluar.barang'])->findOrFail($id);
+
+    return view('admin.hilang.edit', compact('hilang'));
+}
+public function update(Request $request, Hilang $hilang)
+{
+    $request->validate([
+        'jumlah_hilang' => 'required|integer|min:1',
+        'tanggal_hilang' => 'required|date',
+        'keterangan' => 'nullable|string',
+    ]);
+
+    $barangKeluar = $hilang->barangKeluar;
+    $totalHilangLain = $barangKeluar->hilang->where('id', '!=', $hilang->id)->sum('jumlah_hilang');
+    $totalHilangOtomatis = $barangKeluar->kondisi === 'HILANG' ? $barangKeluar->jumlah_keluar : 0;
+
+    $jumlahTersisa = $barangKeluar->jumlah_keluar - $totalHilangLain - $totalHilangOtomatis;
+
+    if ($request->jumlah_hilang > $jumlahTersisa) {
+        return back()->with('error', 'Jumlah hilang melebihi sisa barang. Maksimal: ' . $jumlahTersisa)->withInput();
+    }
+
+    $hilang->update([
+        'jumlah_hilang' => $request->jumlah_hilang,
+        'tanggal_hilang' => $request->tanggal_hilang,
+        'keterangan' => $request->keterangan,
+    ]);
+
+    return redirect()->route('hilang.index')->with('success', 'Data barang hilang berhasil diperbarui.');
+}
+
+public function destroy($id)
+{
+    $hilang = Hilang::findOrFail($id);
+    $hilang->delete();
+
+    return redirect()->route('hilang.index')->with('success', 'Data barang hilang berhasil dihapus.');
+}
     public function exportPdf(Request $request)
 {
     // Ambil data hilang manual (dari tabel Hilang)
@@ -157,6 +198,9 @@ class HilangController extends Controller
     }
 
     $hilangManual = $queryManual->get();
+    $hilangManual->each(function ($item) {
+        $item->tipe = 'manual';
+    });
 
     // Ambil data barang keluar dengan kondisi HILANG (otomatis)
     $hilangOtomatis = BarangKeluar::with(['kategori', 'lokasi', 'barang'])
@@ -179,6 +223,7 @@ class HilangController extends Controller
     // Format otomatis agar seragam dengan manual
     $hilangOtomatisCollection = $hilangOtomatis->map(function ($item) {
         return (object)[
+            'tipe' => 'otomatis',
             'barangKeluar' => $item,
             'jumlah_hilang' => $item->jumlah_keluar,
             'tanggal_hilang' => $item->tanggal_keluar,

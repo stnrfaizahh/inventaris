@@ -19,12 +19,13 @@ class BarangKeluarController extends Controller
 {
     public function create()
     {
+    
        $barangMasuk = Barang::with('kategori')
             ->get()
             ->sortBy('kode_barang')
             ->groupBy(fn($item) => $item->kategori->nama_kategori_barang);
         $lokasi = Lokasi::all();
-
+        
         return view('admin.barang_keluar.create', compact('barangMasuk', 'lokasi'));
     }
 
@@ -69,7 +70,7 @@ class BarangKeluarController extends Controller
 
     // Hitung total stok
     $totalStok = BarangMasuk::where('id_barang', $barang->id_barang)->sum('jumlah_masuk')
-        - BarangKeluar::where('id_barang', $barang->id_barang)->sum('jumlah_keluar');
+                - BarangKeluar::where('id_barang', $barang->id_barang)->sum('jumlah_keluar');
 
     if ($totalStok < $request->jumlah_keluar) {
         return redirect()->back()->with('error', 'Jumlah barang keluar melebihi stok yang tersedia.')->withInput();
@@ -80,9 +81,13 @@ class BarangKeluarController extends Controller
     // Ambil kode barang dari barang masuk (assumsi: data konsisten)
     $barangMasuk = BarangMasuk::where('id_barang', $barang->id_barang)->first();
     $kodeBarangMasuk = $barangMasuk->kode_barang ?? 'UNKNOWN';
-
-    $idLokasi = $request->lokasi;
-    $kodeBarangKeluar = $kodeBarangMasuk . '-' . $idLokasi;
+    
+   // Buat prefix awal dari kode barang dan lokasi
+    $prefix = $kodeBarangMasuk . '-' . $request->lokasi;
+    // Hitung jumlah record yang sudah memakai prefix tersebut
+    $count = BarangKeluar::where('kode_barang_keluar', 'like', "$prefix%")->count() + 1;
+    // Format kode unik dengan urutan
+    $kodeBarangKeluar = $prefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
 
     // Simpan data
     BarangKeluar::create([
@@ -90,7 +95,7 @@ class BarangKeluarController extends Controller
         'id_kategori_barang' => $barang->id_kategori_barang,
         'jumlah_keluar' => $request->jumlah_keluar,
         'kondisi' => $request->kondisi,
-        'id_lokasi' => $idLokasi,
+        'id_lokasi' => $request->lokasi,
         'tanggal_keluar' => $request->tanggal_keluar,
         'masa_pakai' => $request->masa_pakai,
         'tanggal_exp' => $tanggalExp,
@@ -103,7 +108,6 @@ class BarangKeluarController extends Controller
 
     public function index(Request $request)
     {
-
         $query = BarangKeluar::with(['kategori', 'lokasi', 'barang']);
 
         // Filter berdasarkan lokasi
@@ -167,8 +171,8 @@ class BarangKeluarController extends Controller
    // Hitung stok berdasarkan semua barang masuk dan keluar (kecuali record yang sedang diedit)
     $jumlahMasuk = BarangMasuk::where('id_barang', $barangKeluar->id_barang)->sum('jumlah_masuk');
     $jumlahKeluar = BarangKeluar::where('id_barang', $barangKeluar->id_barang)
-                            ->where('id_barang_keluar', '!=', $id)
-                            ->sum('jumlah_keluar');
+                                ->where('id_barang_keluar', '!=', $id)
+                                ->sum('jumlah_keluar');
     $stokTersedia = $jumlahMasuk - $jumlahKeluar;
 
     if ($request->jumlah_keluar > $stokTersedia) {
@@ -189,9 +193,6 @@ class BarangKeluarController extends Controller
 
     return redirect()->route('barang-keluar.index')->with('success', 'Barang keluar berhasil diperbarui.');
 }
-
-
-
     public function destroy($id)
     {
         $barang = BarangKeluar::findOrFail($id);

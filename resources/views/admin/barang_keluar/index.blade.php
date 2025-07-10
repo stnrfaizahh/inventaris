@@ -54,8 +54,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    
-                        <!-- Tombol Filter -->
+                
                         <div class="col-md-3 text-end">
                             <button type="submit" class="btn btn-primary">Filter</button>
                             <a href="{{ route('barang-keluar.index') }}" class="btn btn-secondary">Reset</a>
@@ -63,10 +62,10 @@
                     </form>
                     
                 </div>
-                <!-- Tombol Cetak dan Tambah -->
+                
                 <div class="col-md-4 text-end">
                     <a href="{{ route('barang-keluar.export-pdf', request()->all()) }}" class="btn btn-danger">Export PDF</a>
-                    <a href="{{ route('barang-keluar.print-all-qr', request()->query() )}}" class="btn btn-outline-success" target="_blank">Cetak Semua QR</a>
+                    <a href="{{ route('barang-keluar.print-all-qr', request()->query() )}}" class="btn btn-outline-success" >Cetak Semua QR</a>
                     <a href="{{ route('barang-keluar.create') }}" class="btn btn-primary">Tambah</a>
                 </div>
             </div>
@@ -91,9 +90,9 @@
                     <tbody>
                         @forelse ($barangKeluar as $item)
                         <tr>
-                            <td>{{ ($barangKeluar->currentPage() - 1) * $barangKeluar->perPage() + $loop->iteration }}</td>
+                        <td>{{ ($barangKeluar->currentPage() - 1) * $barangKeluar->perPage() + $loop->iteration }}</td>
                         <td>{{ $item->kategori->nama_kategori_barang }}</td>
-                       <td>{{ $item->barang->nama_barang ?? '-' }}</td>
+                        <td>{{ $item->barang->nama_barang ?? '-' }}</td>
 
                         <td>{{ $item->jumlah_keluar }}</td>
                         <td>{{ ucfirst($item->kondisi) }}</td>
@@ -102,14 +101,10 @@
                         <td>{{ $item->tanggal_exp }}</td>
                         <td>{{ $item->nama_penanggungjawab }}</td>
                         <td>
-                        {!! QrCode::size(80)->generate(
-                            "Kategori: {$item->kategori->nama_kategori_barang}\n" .
-                            "Nama: {$item->nama_barang}\n" .
-                            "Lokasi: {$item->lokasi->nama_lokasi}\n" .
-                            "Tanggal Keluar: " . \Carbon\Carbon::parse($item->tanggal_keluar)->format('d-m-Y') . "\n" .
-                            "Tanggal Exp: " . \Carbon\Carbon::parse($item->tanggal_exp)->format('d-m-Y')
-                        ) !!}
-
+                            <div>
+                                 {!! QrCode::size(80)->generate($item->kode_barang_keluar) !!}
+                                  <div style="font-size: 10px">{{ $item->kode_barang_keluar }}</div>
+                            </div>
                         </td>
                         <td >
                             <a href="{{ route('barang-keluar.edit', $item->id_barang_keluar) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i></a>
@@ -118,25 +113,28 @@
                                             @method('DELETE')
                                 <button class="btn btn-danger btn-sm"><i class="bi bi-trash3-fill"></i></button>
                             </form>
-                             <a href="{{ route('barang-keluar.print-qr', $item->id_barang_keluar) }}" class="btn btn-success btn-sm mt-1" target="_blank">
+                             <a href="{{ route('barang-keluar.print-qr', $item->id_barang_keluar) }}" class="btn btn-success btn-sm mt-1">
                                 <i class="bi bi-printer-fill"></i> QR
                             </a>
                         </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center">Data barang keluar tidak tersedia.</td>
+                            <td colspan="11" class="text-center">Data barang keluar tidak tersedia.</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
+                <div class="mt-3">
+                    {{ $barangKeluar->withQueryString()->links() }}
+                </div>
             </div>
                
        
     </div>
         
         
-    </div> 
+    </div>
 </div>
     
 </section>
@@ -149,6 +147,4 @@
 <script src="{{asset('dist/assets/extensions/datatables.net/js/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('dist/assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js')}}"></script>
 <script src="{{asset('dist/assets/static/js/pages/datatables.js')}}"></script>
-
-
 @endsection

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title','E-Invensi-Barang Hilang')
-@section('header','Berita Acara Barang Hilang')
+@section('header','Data Barang Hilang')
 @section('content')
 
  <!-- Basic Tables start -->
@@ -83,21 +83,35 @@
                             <th>Tanggal Hilang</th>
                             <th>Penanggung Jawab</th>
                             <th>Keterangan</th>
+                            <th>Aksi</th>
                             
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($hilang as $item)
                         <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->barangKeluar->kategori->nama_kategori_barang ?? '-' }}</td>
-                        <td>{{ $item->barangKeluar->barang->nama_barang ?? $item->barangKeluar->nama_barang ?? '-' }}</td>
-                        <td>{{ $item->jumlah_hilang }}</td>
-                        <td>{{ $item->barangKeluar->lokasi->nama_lokasi ?? '-' }}</td>
-                        <td>{{ $item->barangKeluar->tanggal_keluar ?? '-' }}</td>
-                        <td>{{ $item->tanggal_hilang }}</td>
-                        <td>{{ $item->barangKeluar->nama_penanggungjawab ?? '-' }}</td>
-                        <td>{{ $item->keterangan ?? '-' }}</td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->barangKeluar->kategori->nama_kategori_barang ?? '-' }}</td>
+                            <td>{{ $item->barangKeluar->barang->nama_barang ?? $item->barangKeluar->nama_barang ?? '-' }}</td>
+                            <td>{{ $item->jumlah_hilang }}</td>
+                            <td>{{ $item->barangKeluar->lokasi->nama_lokasi ?? '-' }}</td>
+                            <td>{{ $item->barangKeluar->tanggal_keluar ?? '-' }}</td>
+                            <td>{{ $item->tanggal_hilang }}</td>
+                            <td>{{ $item->barangKeluar->nama_penanggungjawab ?? '-' }}</td>
+                            <td>{{ $item->keterangan ?? '-' }}</td>
+                            <td>
+                               @if($item instanceof \App\Models\Hilang)
+                                    <a href="{{ route('hilang.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <form action="{{ route('hilang.destroy', $item) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger" type="submit">Hapus</button>
+                                    </form>
+                                @else
+                                    <span class="badge bg-secondary">Otomatis</span>
+                                @endif
+
+                            </td>
                         </tr>
                         @empty
                         <tr>

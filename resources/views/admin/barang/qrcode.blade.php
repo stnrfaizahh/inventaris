@@ -12,19 +12,18 @@
         }
         .label {
             border: 1px solid #000;
-            width: 48%;
+            width: 350px;
             height: 110px;
             display: table;
             table-layout: fixed;
             border-collapse: collapse;
-            margin: 1%;
+            margin: 10px auto;
             box-sizing: border-box;
-            /* float: left;  */
         }
         .row-label {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
 
         .cell {
@@ -59,46 +58,71 @@
             width: 60px;
             height: 60px;
         }
+        .download-btn {
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
 
-@foreach ($barangList as $index => $barang)
-    @if ($index % 2 == 0)
-    <div class="row-label">
-    @endif
-<div class="label">
-    {{-- Kolom Logo --}}
-    <div class="cell logo">
-        <img src="{{ public_path('images/logo.png') }}" alt="Logo">
-        <div class="logo-text"> SD Islam Tompokersan </div>
-        <div class="logo-text">  Lumajang</div>
+    <div style="margin: 20px; text-align: center;">
+        <button onclick="downloadLabels()" class="download-btn">Unduh QR Code Sebagai Gambar</button>
     </div>
 
-    {{-- Kolom Informasi Barang --}}
-    <div class="cell info">
-        <h2>{{ $barang->kode_barang }}</h2>
-        <br>
-        <hr style="border: none; border-top: 1px solid #000;">
-        <br>
-        <h4>{{ $barang->nama_barang }}</h4>
+    <div id="label-wrapper">
+        @foreach ($items as $index => $barang)
+            @if ($index % 2 == 0)
+            <div class="row-label">
+            @endif
+
+            <div class="label">
+                {{-- Kolom Logo --}}
+                <div class="cell logo">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo">
+                    <div class="logo-text">SD Islam Tompokersan</div>
+                    <div class="logo-text">Lumajang</div>
+                </div>
+
+                {{-- Kolom Informasi --}}
+                <div class="cell info">
+                    <h2>{{ $barang->kode_barang }}</h2>
+                    <hr style="border: none; border-top: 1px solid #000;">
+                    <h4>{{ $barang->nama_barang }}</h4>
+                </div>
+
+                {{-- Kolom QR Code --}}
+                <div class="cell qr">
+                    @php
+                        $qrData = "Kode: {$barang->kode_barang}\nNama: {$barang->nama_barang}";
+                        $qr = base64_encode(QrCode::format('png')->size(150)->margin(1)->generate($barang->barcode));
+                    @endphp
+                    <img src="data:image/png;base64,{{ $qr }}" alt="QR Code">
+                </div>
+            </div>
+
+            @if ($index % 2 == 1 || $loop->last)
+            </div>
+            @endif
+        @endforeach
     </div>
 
-    {{-- Kolom QR Code --}}
-    <div class="cell qr">
-        @php
-        $qr = base64_encode(QrCode::format('svg')->size(100)->generate($barang->barcode));
-    @endphp
-    
-    <img src="data:image/png;base64, {!! $qr !!}" width="100">
-    
-    </div>
-</div>
-@if ($index % 2 == 1 || $loop->last)
-</div>
-@endif
-@endforeach
-<div style="clear: both;"></div>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+    function downloadLabels() {
+        const labels = document.querySelectorAll('.label');
+        labels.forEach((label, index) => {
+            html2canvas(label, {
+                scale: 4,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `label-barang-${index + 1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+    }
+    </script>
 
 </body>
 </html>

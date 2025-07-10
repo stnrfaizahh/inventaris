@@ -100,5 +100,27 @@ class DashboardController extends Controller
     return response()->json($formattedData);
 }
 
-    
+   public function getStokBarangById($id)
+{
+    $barang = \App\Models\Barang::with('kategori')->find($id);
+    if (!$barang) {
+        return response()->json(['stok' => 0]);
+    }
+
+    // Hitung jumlah masuk
+    $jumlahMasuk = BarangMasuk::where('id_barang', $id)->sum('jumlah_masuk');
+
+    // Hitung jumlah keluar
+    $jumlahKeluar = BarangKeluar::where('id_barang', $id)->sum('jumlah_keluar');
+
+    // Hitung stok
+    $stok = $jumlahMasuk - $jumlahKeluar;
+
+    return response()->json([
+        'stok' => $stok,
+        'nama_barang' => $barang->nama_barang,
+        'kategori' => $barang->kategori->nama_kategori_barang ?? '-'
+    ]);
+}
+ 
 }

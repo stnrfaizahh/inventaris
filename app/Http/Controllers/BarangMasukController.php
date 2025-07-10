@@ -148,10 +148,10 @@ class BarangMasukController extends Controller
         $barang = BarangMasuk::findOrFail($id);
         // Hitung stok dl sebelum di hapus
         $stokTerkini = BarangMasuk::where('id_kategori_barang', $barang->id_kategori_barang)
-            ->where('nama_barang', $barang->nama_barang)
+            ->where('id_barang', $barang->id_barang)
             ->sum('jumlah_masuk')
             - BarangKeluar::where('id_kategori_barang', $barang->id_kategori_barang)
-            ->where('nama_barang', $barang->nama_barang)
+            ->where('id_barang', $barang->id_barang)
             ->sum('jumlah_keluar');
 
         if ($stokTerkini - $barang->jumlah_masuk < 0) {

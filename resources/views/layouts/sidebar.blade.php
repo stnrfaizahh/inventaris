@@ -151,19 +151,34 @@
                 <a href="{{ route('hilang.index') }}" class="submenu-link">Berita Acara Barang Hilang</a>
             </li>
         </ul>
-    </li>   
+    </li>
      
+    <!-- Scan Barcode -->
+    <li class="sidebar-item {{ Request::is('scan-barcode*') ? 'active' : '' }}">
+        <a href="{{ route('scan-barcode.index') }}" class='sidebar-link'>
+            <i class="bi bi-upc-scan"></i>
+            <span>Scan Barcode</span>
+        </a>
+    </li>
+    <li class="sidebar-item {{ Request::is('inventaris*') ? 'active' : '' }}">
+        <a href="{{ route('inventaris.index') }}" class='sidebar-link'>
+            <i class="bi bi-archive"></i>
+            <span>Inventaris</span>
+        </a>
+    </li>
+
     <li>
-    <div class="sidebar-footer">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="sidebar-link text-danger" style="background: none; border: none;">
-                <i class="bi bi-person-dash"></i>
-                <span>Logout</span>
-            </button>
-        </form>
-    </div></li>
-        </ul>
+        <div class="sidebar-footer">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="sidebar-link text-danger" style="background: none; border: none;">
+                    <i class="bi bi-person-dash"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </li>
+</ul>
     
         
         

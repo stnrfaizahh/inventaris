@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('barang_keluar', function (Blueprint $table) {
         $table->unsignedBigInteger('id_barang')->nullable()->after('id_kategori_barang');
-        $table->string('kode_barang_keluar')->nullable()->after('nama_penanggungjawab');
+        $table->string('kode_barang_keluar')->unique()->nullable()->after('nama_penanggungjawab');
     });
     }
 
